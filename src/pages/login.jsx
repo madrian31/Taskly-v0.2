@@ -1,12 +1,19 @@
 import '../App.css'
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
+
+    const navigate = useNavigate();
+
+    const handleLogin = () => {
+        navigate('/home');
+    }
+
     return (
         <>
             <h1>Login</h1>
             <p>Welcome back! Please log in to continue.</p>
-            <Link to="/home">Go to Home</Link>
+            <button onClick={handleLogin}>Login</button>
         </>
     )
 }
