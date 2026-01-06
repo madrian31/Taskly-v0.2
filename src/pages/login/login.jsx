@@ -1,19 +1,12 @@
 import '../../App.css'
 import { useNavigate } from 'react-router-dom';
-import { signInWithPopup } from "firebase/auth";
-import { auth, googleProvider   } from '../../firebase/firebaseConfig';
 
-function Login() {
+function login() {
 
     const navigate = useNavigate();
 
-    const handleLogin = async () => {
-        try {
-            await signInWithPopup(auth, googleProvider);
-            navigate('/home');
-        } catch (error) {
-            console.error("Error signing in with popup:", error);
-        }
+    const handleLogin = () => {
+        navigate('/home');
     }
 
     return (
@@ -25,5 +18,4 @@ function Login() {
     )
 }
 
-
-export default Login
+export default login
