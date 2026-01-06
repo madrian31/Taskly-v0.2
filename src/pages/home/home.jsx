@@ -1,13 +1,23 @@
-import '../../App.css'
-import Sidebar from '../../components/sidebar';
+// src/pages/home/Home.jsx
+import { useNavigate } from "react-router-dom";
+import { auth } from "../../firebase/firebaseConfig";
+import { signOut } from "firebase/auth";
 
-function home() {
-    return (
-        <>
-        <Sidebar />
-            <h1>Home</h1>
-            <p>Welcome to the Home Page!</p>
-        </>
-    )
+function Home() {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    navigate("/login");
+  };
+
+  return (
+    <div>
+      <h1>Home</h1>
+      <p>Welcome to your dashboard!</p>
+      <button onClick={handleLogout}>Logout</button>
+    </div>
+  );
 }
-export default home
+
+export default Home;

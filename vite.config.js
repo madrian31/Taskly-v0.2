@@ -5,6 +5,9 @@ export default defineConfig({
   plugins: [react()],
   base: '/Taskly-v0.2/',
   server: {
+    headers: {
+       "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+    },
     port: 5500,
     host: true
   },
