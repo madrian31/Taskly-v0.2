@@ -1,5 +1,5 @@
-import '../App.css'
-import Sidebar from '../components/sidebar';
+import '../../App.css'
+import Sidebar from '../../components/sidebar';
 
 function home() {
     return (

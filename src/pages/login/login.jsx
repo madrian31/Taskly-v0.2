@@ -1,7 +1,7 @@
-import '../App.css'
+import '../../App.css'
 import { useNavigate } from 'react-router-dom';
 
-function Login() {
+function login() {
 
     const navigate = useNavigate();
 
@@ -18,4 +18,4 @@ function Login() {
     )
 }
 
-export default Login
+export default login
