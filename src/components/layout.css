@@ -3,9 +3,13 @@
   min-height: 100vh;
 }
 
-
-/* CONTENT */
 .content {
   flex: 1;
-  padding: 20px;
+  padding: 24px;
 }
+
+/* .section {
+  margin: 0 auto;
+  max-width: 1100px;
+  text-align: center;
+} */

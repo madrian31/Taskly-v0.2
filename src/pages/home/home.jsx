@@ -1,14 +1,12 @@
 import '../../App.css'
-import Sidebar from '../../components/shared/sidebar';
+import Section from '../../components/shared/section/section'
 
 function home() {
     return (
-        <>
-            <section className="home" id='home'>
+           <Section id="home">
                 <h2>Welcome to Taskly</h2>
                 <p>Your personal task management app to boost productivity and stay organized.</p>
-            </section>
-        </>
+            </Section>
     )
 }
 export default home

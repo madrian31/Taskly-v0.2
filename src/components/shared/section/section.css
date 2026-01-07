@@ -1,0 +1,13 @@
+.section {
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.section.center {
+  min-height: 100vh;      /* important */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* vertical */
+  align-items: center;     /* horizontal */
+  text-align: center;
+}
