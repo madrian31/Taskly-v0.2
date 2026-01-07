@@ -13,3 +13,9 @@
   text-align: center;
   height: 100%;
 }
+
+.content {
+  flex: 1;
+  padding: 24px;
+  display: flex;
+}

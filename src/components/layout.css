@@ -2,15 +2,3 @@
   display: flex;
   min-height: 100vh;
 }
-
-.content {
-  flex: 1;
-  padding: 24px;
-  display: flex;
-}
-
-/* .section {
-  margin: 0 auto;
-  max-width: 1100px;
-  text-align: center;
-} */

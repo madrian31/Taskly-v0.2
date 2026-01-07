@@ -1,7 +1,53 @@
-.sidebar{
-    width: 200px;
-    height: 100vh;
-    background-color: #111827; /* dark sidebar */
-    color: #ffffff;
-    padding: 20px;
+/* Sidebar container */
+.sidebar {
+  width: 220px;
+  height: 100vh;
+  background-color: #1f2933; /* dark blue-gray */
+  color: #ffffff;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+/* Title */
+.sidebar h2 {
+  margin-bottom: 30px;
+  font-size: 22px;
+  text-align: center;
+}
+
+/* Menu list */
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Menu items */
+.sidebar ul li {
+  margin-bottom: 15px;
+}
+
+/* Links */
+.sidebar ul li a {
+  text-decoration: none;
+  color: #d1d5db;
+  font-size: 16px;
+  display: block;
+  padding: 10px;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+
+/* Hover effect */
+.sidebar ul li a:hover {
+  background-color: #374151;
+  color: #ffffff;
+}
+
+/* Active link (optional later) */
+.sidebar ul li a.active {
+  background-color: #2563eb;
+  color: #ffffff;
 }
