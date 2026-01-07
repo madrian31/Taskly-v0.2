@@ -1,50 +1,38 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../../firebase/firebase';
-import './login.css';
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import Section from '../../components/shared/section/section'
+import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth'
+import { auth } from '../../firebase/firebase'
 
-function Login() {
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
+export default function Login() {
+  const navigate = useNavigate()
+  const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                navigate('/home');
-            }
-            setLoading(false);
-        });
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        navigate('/home')
+      }
+      setLoading(false)
+    })
 
-        return () => unsubscribe();
-    }, [navigate]);
+    return () => unsubscribe()
+  }, [navigate])
 
-    const handleGoogleSignIn = async () => {
-        const provider = new GoogleAuthProvider();
-        try {
-            await signInWithPopup(auth, provider);
-        } catch (error) {
-            console.error('Error signing in with Google:', error);
-            alert('Failed to sign in with Google');
-        }
-    };
+  const handleGoogleSignIn = async () => {
+    const provider = new GoogleAuthProvider()
+    await signInWithPopup(auth, provider)
+  }
 
-    if (loading) {
-        return <div className="loading">Loading...</div>;
-    }
+  if (loading) return <div>Loading...</div>
 
-    return (
-        <div className="login-container">
-            <h1>Login</h1>
-            <p>Welcome back! Please log in to continue.</p>
-            <button
-                onClick={handleGoogleSignIn}
-                className="login-button"
-            >
-                Sign in with Google
-            </button>
-        </div>
-    );
+  return (
+    <Section>
+      <h1>Login</h1>
+      <p>Welcome back! Please log in to continue.</p>
+      <button onClick={handleGoogleSignIn}>
+        Sign in with Google
+      </button>
+    </Section>
+  )
 }
-
-export default Login;

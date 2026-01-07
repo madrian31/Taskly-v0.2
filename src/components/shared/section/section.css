@@ -11,4 +11,5 @@
   justify-content: center; /* vertical */
   align-items: center;     /* horizontal */
   text-align: center;
+  height: 100%;
 }
