@@ -1,7 +1,7 @@
 import '../../App.css'
-import Section from '../../components/shared/section/section'
+import Section from '../../components/shared/section/section';
 
-function home() {
+function Home() {
     return (
            <Section id="home">
                 <h2>Welcome to Taskly</h2>
@@ -9,4 +9,4 @@ function home() {
             </Section>
     )
 }
-export default home
+export default Home

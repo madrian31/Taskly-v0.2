@@ -1,0 +1,29 @@
+/* Main layout container */
+.main-layout-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  background: #2d2d2d;
+}
+
+/* Main content area */
+.main-content {
+  flex: 1;
+  margin-left: 220px; /* account for fixed sidebar width */
+  padding: 20px;
+  background: #2d2d2d;
+  color: #fff;
+  overflow-y: auto;
+}
+
+/* Make main content full width on mobile */
+@media (max-width: 768px) {
+  .main-layout-container {
+    flex-direction: column;
+  }
+
+  .main-content {
+    margin-left: 0;
+    flex: 1;
+  }
+}
