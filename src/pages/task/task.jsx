@@ -1,10 +1,13 @@
 import './task.css';
+import '../../App.css';
+import Section from '../../components/shared/section/section';
 
 function Task() {
     return (
-        <div className="task-page">
-            <h1>Task Page</h1>
-        </div>
+            <Section id="task">
+                <h2>Your Tasks</h2>
+                <p>Manage your tasks effectively with Taskly.</p>
+            </Section>
     );
 }
 
