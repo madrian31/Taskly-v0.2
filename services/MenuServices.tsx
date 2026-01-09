@@ -11,7 +11,7 @@ export const menuItems: MenuItem[] = [
         sortOrder: 2,
         name: 'Tasks',
         icon: '',
-        link: '/'
+        link: '/task'
     },
     {
         sortOrder: 3,

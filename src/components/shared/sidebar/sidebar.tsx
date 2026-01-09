@@ -14,7 +14,7 @@ export default function Sidebar({children}: SidebarProps) {
             <ul>
                 {
                     menuItems.map((item) => (
-                        <li key={item.Link}>
+                        <li key={item.link}>
                             <Link to={item.link}>
                                 {item.icon && <span className="material-icons">{item.icon}</span>}
                                 {item.name}
