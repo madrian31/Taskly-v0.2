@@ -16,7 +16,7 @@ import Task from './pages/task/task'
 
 // Layout Components
 import Layout from './components/layout'
-import MainLayout from './components/main-layout/main-layout'
+import MainLayout from './components/main-layout/main-layout' 
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
