@@ -1,28 +1,28 @@
 import {MenuItem} from './interfaces/IMenuServices';
 
-const menuItems: MenuItem[] = [
+export const menuItems: MenuItem[] = [
     {
         sortOrder: 1,
         name: 'Home',
-        icon: 'home',
+        icon: '',
         link: '/'
     },
     {
         sortOrder: 2,
         name: 'Tasks',
-        icon: 'check_circle',
+        icon: '',
         link: '/'
     },
     {
         sortOrder: 3,
         name:'Calendar',
-        icon: 'calendar_today',
+        icon: '',
         link: '/calendar'
     },
     {
         sortOrder: 4,
         name: 'Settings',
-        icon: 'settings',
-        link: '/settings'   
+        icon: '',
+        link: '/'   
     }
 ]
