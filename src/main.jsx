@@ -1,14 +1,22 @@
+// Styles
+import './index.css'
+
+// React and React Router
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
-import Login from './pages/login/login';
-import Home from './pages/home/home';
-import Task from './pages/task/task';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
-import Layout from './components/layout';
-import MainLayout from './components/main-layout/main-layout';  // ← lowercase!
+// Main App
+import App from './App.jsx'
+
+// Pages
+import Login from './pages/login/login'
+import Home from './pages/home/home'
+import Task from './pages/task/task'
+
+// Layout Components
+import Layout from './components/layout'
+import MainLayout from './components/main-layout/main-layout'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
