@@ -83,6 +83,7 @@ button .logout-btn {
   transition: background 0.2s, color 0.2s;
   position: absolute;
   bottom: 0;
+  border-radius: 0;
 }
 
 .logout-btn:hover {
