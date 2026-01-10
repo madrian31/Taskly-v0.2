@@ -11,7 +11,8 @@ export default function Login() {
   useEffect(() => {
     const unsubscribe = AuthService.onAuthStateChanged((user: User | null) => {
       if (user) {
-        navigate('/home')
+        const base = import.meta.env.BASE_URL || '/'
+        window.location.replace(`${base}home`)
       }
       setLoading(false)
     })
