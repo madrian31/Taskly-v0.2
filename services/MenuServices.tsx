@@ -24,5 +24,11 @@ export const menuItems: MenuItem[] = [
         name: 'Settings',
         icon: '',
         link: '/settings'   
+    },
+    {
+        sortOrder: 5,
+        name: 'Logout',
+        icon: '',
+        action: 'logout'
     }
 ]
