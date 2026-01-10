@@ -24,7 +24,19 @@ export default function Sidebar({children}: SidebarProps) {
         <aside className="sidebar">
             
             <div className="sidebar-header">
-               <h2>Tasky</h2>
+
+             <h2>Tasky</h2>
+
+            <div className="user-profile">
+                <div className="user-avatar">
+                    <img id="userPhoto" src="https://ui-avatars.com/api/?name=User&background=3498db&color=fff" alt="Profile" />
+                </div>
+                <div className="user-info">
+                    <h4 id="userName">Loading...</h4>
+                    <p id="userEmail">Please wait...</p>
+                </div>
+                </div>
+
             </div>
             
             <ul>
