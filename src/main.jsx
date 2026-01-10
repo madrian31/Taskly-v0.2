@@ -16,7 +16,8 @@ import Task from './pages/task/task'
 
 // Layout Components
 import Layout from './components/layout'
-import MainLayout from './components/main-layout/main-layout' 
+import MainLayout from './components/main-layout/main-layout'
+import RequireAuth from './auth/RequireAuth'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -28,12 +29,12 @@ createRoot(document.getElementById('root')).render(
           <Route path="/login" element={<Login />} />
         </Route>
 
-        <Route element={<MainLayout />}>
+        <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
           <Route path="/home" element={<Home />} />
           <Route path="/task" element={<Task />} />
         </Route>
         
       </Routes>
     </BrowserRouter>
-  </StrictMode>,
+  </StrictMode>
 )

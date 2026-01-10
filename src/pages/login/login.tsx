@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { User } from 'firebase/auth'
 import Section from '../../components/shared/section/section'
-import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth'
-import { auth } from '../../firebase/firebase'
+import AuthService from '../../../services/authService'
 
 export default function Login() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = AuthService.onAuthStateChanged((user: User | null) => {
       if (user) {
         navigate('/home')
       }
@@ -20,14 +20,17 @@ export default function Login() {
   }, [navigate])
 
   const handleGoogleSignIn = async () => {
-    const provider = new GoogleAuthProvider()
-    await signInWithPopup(auth, provider)
+    try {
+      await AuthService.signInWithGoogle()
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   if (loading) return <div>Loading...</div>
 
   return (
-    <Section>
+    <Section id="login">
       <h1>Login</h1>
       <p>Welcome back! Please log in to continue.</p>
       <button onClick={handleGoogleSignIn}>

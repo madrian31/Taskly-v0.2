@@ -11,10 +11,20 @@
 }
 
 /* Title */
-.sidebar h2 {
-  margin-bottom: 30px;
-  font-size: 22px;
+.sidebar-header {
+  margin: 0;
+  padding: 12px 0;
+  background-color: #111827; /* darker shade */
   text-align: center;
+  border-bottom: 1px solid #374151;
+}
+
+.sidebar-header h2 {
+  margin: 0 !important;
+  padding: 0 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
 }
 
 /* Menu list */

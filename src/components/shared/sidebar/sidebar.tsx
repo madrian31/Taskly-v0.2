@@ -10,7 +10,11 @@ interface SidebarProps {
 export default function Sidebar({children}: SidebarProps) {
     return (
         <aside className="sidebar">
-            <h2>Tasky</h2>
+            
+            <div className="sidebar-header">
+               <h2>Tasky</h2>
+            </div>
+            
             <ul>
                 {
                     menuItems.map((item) => (

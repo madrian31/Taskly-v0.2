@@ -23,6 +23,6 @@ export const menuItems: MenuItem[] = [
         sortOrder: 4,
         name: 'Settings',
         icon: '',
-        link: '/'   
+        link: '/settings'   
     }
 ]
