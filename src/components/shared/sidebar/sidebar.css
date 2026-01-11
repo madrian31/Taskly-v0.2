@@ -2,19 +2,64 @@
 .sidebar {
   width: 220px;
   height: 100vh;
-  background-color: #1f2933; /* dark blue-gray */
+  background-color: #1f2933;
   color: #ffffff;
   box-sizing: border-box;
   position: fixed;
   top: 0;
   left: 0;
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+
+/* Hamburger Menu Button - Hidden on desktop */
+.hamburger-btn {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1001;
+  background-color: #1f2933;
+  border: none;
+  color: #ffffff;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s;
+}
+
+.hamburger-btn:hover {
+  background-color: #374151;
+}
+
+/* When sidebar is open change hamburger background */
+.hamburger-btn.hamburger-open {
+  background-color: #111827;
+  box-shadow: none;
+  color: #ffffff;
+}
+
+.hamburger-btn .material-icons {
+  font-size: 24px;
+}
+
+/* Overlay for mobile */
+.sidebar-overlay {
+  display: none;
+  position: fixed;  
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
 }
 
 /* Title */
 .sidebar-header {
   margin: 0;
-  /* padding: 12px 0; */
-  background-color: #111827; /* darker shade */
+  background-color: #111827;
   text-align: center;
   border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
@@ -31,7 +76,6 @@
 /* user profile */
 .user-profile {
   padding: 20px;
-  /* border-bottom: 1px solid rgba(255, 255, 255, 0.1); */
   display: flex;
   align-items: center;
   gap: 12px;
@@ -75,7 +119,6 @@
   text-overflow: ellipsis;
 }
 
-
 /* Menu list */
 .sidebar ul {
   list-style: none;
@@ -105,14 +148,13 @@
   color: #ffffff;
 }
 
-/* Active link (optional later) */
+/* Active link */
 .sidebar ul li a.active {
   background-color: #2563eb;
   color: #ffffff;
 }
 
 /* Logout Button */
-
 button .logout-btn {
   border-radius: 0 !important;
 }
@@ -139,4 +181,27 @@ button .logout-btn {
   background-color: #374151;
   color: #ffffff;
   transition: background 0.2s, color 0.2s;
+}
+
+/* RESPONSIVE DESIGN - Mobile (800px and below) */
+@media (max-width: 800px) {
+  /* Hide sidebar by default on mobile */
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  /* Show sidebar when open */
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  /* Show hamburger button on mobile */
+  .hamburger-btn {
+    display: block;
+  }
+
+  /* Show overlay when sidebar is open */
+  .sidebar-overlay {
+    display: block;
+  }
 }
