@@ -11,8 +11,9 @@ export default function Login() {
   useEffect(() => {
     const unsubscribe = AuthService.onAuthStateChanged((user: User | null) => {
       if (user) {
-        // use React Router navigation so HashRouter keeps URL as '#/home'
-        navigate('/home', { replace: true })
+        // Force a full page load to ensure the home page is fully refreshed
+        const target = `${window.location.origin}${window.location.pathname}?reload=1#/home`
+        window.location.href = target
       }
       setLoading(false)
     })
@@ -22,7 +23,11 @@ export default function Login() {
 
   const handleGoogleSignIn = async () => {
     try {
-      await AuthService.signInWithGoogle()
+      const result = await AuthService.signInWithGoogle()
+      if (result && result.user) {
+        const target = `${window.location.origin}${window.location.pathname}?reload=1#/home`
+        window.location.href = target
+      }
     } catch (error) {
       console.error(error)
     }

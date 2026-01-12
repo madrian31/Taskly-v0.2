@@ -8,9 +8,9 @@ class AuthService implements IAuthService {
         return onAuthStateChanged(auth, callback)
     }
 
-    async signInWithGoogle(): Promise<void> {
+    async signInWithGoogle(): Promise<UserCredential> {
         const provider = new GoogleAuthProvider();
-        await signInWithPopup(auth, provider);
+        return await signInWithPopup(auth, provider);
     }
 
     async signOutUser(): Promise<void> {
