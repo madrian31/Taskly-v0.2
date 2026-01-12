@@ -89,73 +89,75 @@ function Task() {
                 </div>
             </div>
 
-            <div className="tasks-grid">
-                {tasks.map(task => {
-                    const completedCount = task.subtasks.filter(s => s.completed).length;
-                    const total = task.subtasks.length;
+            <div className='task-container'>
+                <div className="tasks-grid">
+                    {tasks.map(task => {
+                        const completedCount = task.subtasks.filter(s => s.completed).length;
+                        const total = task.subtasks.length;
 
-                    return (
-                        <article
-                            className={`task-card ${task.completed ? 'completed' : ''}`}
-                            key={task.id}
-                        >
-                            <header className="task-top">
-                                <label className="check">
-                                    <input
-                                        type="checkbox"
-                                        checked={task.completed}
-                                        onChange={() => toggleTaskCompletion(task.id)}
-                                    />
-                                    <span className="checkmark" />
-                                </label>
-                                <div className="task-main">
-                                    <h3 className="task-title">{task.title}</h3>
-                                    <p className="task-desc">{task.description}</p>
+                        return (
+                            <article
+                                className={`task-card ${task.completed ? 'completed' : ''}`}
+                                key={task.id}
+                            >
+                                <header className="task-top">
+                                    <label className="check">
+                                        <input
+                                            type="checkbox"
+                                            checked={task.completed}
+                                            onChange={() => toggleTaskCompletion(task.id)}
+                                        />
+                                        <span className="checkmark" />
+                                    </label>
+                                    <div className="task-main">
+                                        <h3 className="task-title">{task.title}</h3>
+                                        <p className="task-desc">{task.description}</p>
+                                    </div>
+                                </header>
+
+                                <div className="badges">
+                                    <span className="badge badge-assignee">{task.assignee}</span>
+                                    <span className="badge badge-date">{task.dueDate}</span>
+                                    <span className="badge badge-frequency">{task.frequency}</span>
                                 </div>
-                            </header>
 
-                            <div className="badges">
-                                <span className="badge badge-assignee">{task.assignee}</span>
-                                <span className="badge badge-date">{task.dueDate}</span>
-                                <span className="badge badge-frequency">{task.frequency}</span>
-                            </div>
+                                <section className="subtasks">
+                                    <div className="subtasks-header">
+                                        <small>
+                                            {total > 0 ? `${completedCount}/${total} completed` : 'No subtasks'}
+                                        </small>
+                                    </div>
+                                    <ul>
+                                        {task.subtasks.map(sub => (
+                                            <li key={sub.id} className={`subtask ${sub.completed ? 'done' : ''}`}>
+                                                <label>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={sub.completed}
+                                                        onChange={() => toggleSubtask(task.id, sub.id)}
+                                                    />
+                                                    <span className="sub-label">{sub.title}</span>
+                                                </label>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </section>
 
-                            <section className="subtasks">
-                                <div className="subtasks-header">
-                                    <small>
-                                        {total > 0 ? `${completedCount}/${total} completed` : 'No subtasks'}
-                                    </small>
-                                </div>
-                                <ul>
-                                    {task.subtasks.map(sub => (
-                                        <li key={sub.id} className={`subtask ${sub.completed ? 'done' : ''}`}>
-                                            <label>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={sub.completed}
-                                                    onChange={() => toggleSubtask(task.id, sub.id)}
-                                                />
-                                                <span className="sub-label">{sub.title}</span>
-                                            </label>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </section>
-
-                            <footer className="task-actions">
-                                <button className="btn btn-edit" title="Edit">Edit</button>
-                                <button className="btn btn-share" title="Share">Share</button>
-                                <button
-                                    className="btn btn-delete"
-                                    title="Delete"
-                                    onClick={() => deleteTask(task.id)}
-                                >
-                                    Delete
-                                </button>
-                            </footer>
-                        </article>
-                    );
-                })}
+                                <footer className="task-actions">
+                                    <button className="btn btn-edit" title="Edit">Edit</button>
+                                    <button className="btn btn-share" title="Share">Share</button>
+                                    <button
+                                        className="btn btn-delete"
+                                        title="Delete"
+                                        onClick={() => deleteTask(task.id)}
+                                    >
+                                        Delete
+                                    </button>
+                                </footer>
+                            </article>
+                        );
+                    })}
+                </div>
             </div>
 
             <button className="fab" aria-label="Add task" onClick={addTask}>
