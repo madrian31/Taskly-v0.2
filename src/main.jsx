@@ -4,7 +4,7 @@ import './index.css'
 // React and React Router
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 
 // Main App
 import App from './App.jsx'
@@ -21,7 +21,7 @@ import RequireAuth from './auth/RequireAuth'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter basename='/Taskly-v0.2'>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<App />} />
 
@@ -35,6 +35,6 @@ createRoot(document.getElementById('root')).render(
         </Route>
         
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   </StrictMode>
 )
