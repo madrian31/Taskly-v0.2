@@ -4,7 +4,7 @@ import "./sidebar.css";
 import { menuItems } from "../../../../services/MenuServices";
 import { ReactNode } from "react";
 import AuthService from "../../../../services/authService";
-import { getAvatarUrl } from "../../../../services/avatar";
+import { getAvatarUrl } from "../../../services/avatar";
 
 interface SidebarProps {
     children?: ReactNode;
