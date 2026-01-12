@@ -1,9 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./sidebar.css";
 import { menuItems } from "../../../../services/MenuServices";
 import { ReactNode } from "react";
 import AuthService from "../../../../services/authService";
+import { getAvatarUrl } from "../../../../services/avatar";
 
 interface SidebarProps {
     children?: ReactNode;
@@ -12,6 +13,25 @@ interface SidebarProps {
 export default function Sidebar({children}: SidebarProps) {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
+    const [userName, setUserName] = useState<string | null>(null);
+    const [userEmail, setUserEmail] = useState<string | null>(null);
+    const [userPhoto, setUserPhoto] = useState<string | null>(null);
+
+    useEffect(() => {
+        const unsubscribe = AuthService.onAuthStateChanged((user) => {
+            if (user) {
+                setUserName(user.displayName || user.email || 'User');
+                setUserEmail(user.email || '');
+                setUserPhoto(user.photoURL || null);
+            } else {
+                setUserName(null);
+                setUserEmail(null);
+                setUserPhoto(null);
+            }
+        });
+
+        return () => unsubscribe();
+    }, []);
 
     const handleLogout = async () => {
         try {
@@ -54,13 +74,17 @@ export default function Sidebar({children}: SidebarProps) {
 
                 <div className="user-profile">
                     <div className="user-avatar">
-                        <img id="userPhoto" src="https://ui-avatars.com/api/?name=User&background=3498db&color=fff" alt="Profile" />
+                        <img
+                            id="userPhoto"
+                            src={getAvatarUrl({ photoURL: userPhoto, name: userName || 'User', size: 80, bgColor: '#3498db' })}
+                            alt="Profile"
+                        />
                     </div>
                     <div className="user-info">
-                        <h4 id="userName">Loading...</h4>
-                        <p id="userEmail">Please wait...</p>
+                        <h5 id="userName">{userName ?? 'Loading...'}</h5>
+                        <p id="userEmail">{userEmail ?? 'Please wait...'}</p>
                     </div>
-                    </div>
+                </div>
 
                 </div>
                 
