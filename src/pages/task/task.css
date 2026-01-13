@@ -14,13 +14,17 @@
 	/* align-items:center; */
 	margin-bottom:1rem;
 	width: 100%;
-	border: 3px solid #ffff;
+	background-color: #111920;
+	padding: 20px;
+	border-radius: 14px;
 }
 
 .task-container{
-	border: 3px solid #ffff;
+	padding: 20px;
 	height: 100vh;
 	width: 100%;
+	border-radius: 14px;
+	background-color: #111920;
 }
 
 .tasks-grid{
@@ -89,12 +93,14 @@
 .task-title {
 	margin: 0;
 	font-size: 1.05rem;
+	text-align: left;
 }
 
 .task-desc {
 	margin: 4px 0 0;
 	color: var(--muted);
 	font-size: 0.95rem;
+	text-align: left;
 }
 
 .badges {

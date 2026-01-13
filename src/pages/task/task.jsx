@@ -145,7 +145,6 @@ function Task() {
 
                                 <footer className="task-actions">
                                     <button className="btn btn-edit" title="Edit">Edit</button>
-                                    <button className="btn btn-share" title="Share">Share</button>
                                     <button
                                         className="btn btn-delete"
                                         title="Delete"
