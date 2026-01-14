@@ -3,6 +3,7 @@
   max-width: 1100px;
   padding: 20px;
   width: 100%;
+  /* background-color: #ffffff; */
 }
 
 .section.center {
@@ -18,4 +19,14 @@
   flex: 1;
   padding: 24px;
   display: flex;
+}
+
+p{
+    color: #242424 ;
+}
+
+h2 {
+  color: #242424 ;
+  font-size: 3.2em;
+  line-height: 1.1;
 }
