@@ -1,83 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './task.css';
 import '../../App.css';
 import Section from '../../components/shared/section/section';
+import { TaskRepository } from '../../../repository/TaskRepository';
 
-const sampleTasks = [
-    {
-        id: 1,
-        title: 'Design landing page',
-        description: 'Create hero, features and CTA sections',
-        assignee: 'Ava',
-        dueDate: '2026-01-20',
-        frequency: 'Weekly',
-        completed: false,
-        subtasks: [
-            { id: 11, title: 'Wireframe', completed: true },
-            { id: 12, title: 'High-fidelity mock', completed: false },
-        ],
-    },
-    {
-        id: 2,
-        title: 'Write docs',
-        description: 'Update README and usage examples',
-        assignee: 'Liam',
-        dueDate: '2026-01-25',
-        frequency: 'Monthly',
-        completed: false,
-        subtasks: [
-            { id: 21, title: 'API section', completed: false },
-            { id: 22, title: 'Examples', completed: false },
-        ],
-    },
-];
+const taskRepository = new TaskRepository();
 
 function Task() {
-    const [tasks, setTasks] = useState(sampleTasks);
+    const [tasks, setTasks] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    function toggleTaskCompletion(id) {
-        setTasks(prev =>
-            prev.map(t => {
-                if (t.id !== id) return t;
-                // toggle; if marking complete mark all subtasks complete as well
-                const completed = !t.completed;
-                return {
-                    ...t,
-                    completed,
-                    subtasks: t.subtasks.map(s => ({ ...s, completed: completed ? true : s.completed })),
-                };
-            })
-        );
+    useEffect(() => {
+        loadTasks();
+    }, []);
+
+    async function loadTasks() {
+        try {
+            setLoading(true);
+            const tasksFromDb = await taskRepository.getAllTasks();
+            setTasks(tasksFromDb);
+        } catch (error) {
+            console.error('Error loading tasks:', error);
+        } finally {
+            setLoading(false);
+        }
     }
 
-    function toggleSubtask(taskId, subId) {
-        setTasks(prev =>
-            prev.map(t => {
-                if (t.id !== taskId) return t;
-                const subtasks = t.subtasks.map(s => (s.id === subId ? { ...s, completed: !s.completed } : s));
-                const allDone = subtasks.every(s => s.completed);
-                return { ...t, subtasks, completed: allDone };
-            })
-        );
+    async function toggleTaskCompletion(id) {
+        try {
+            const task = tasks.find(t => t.id === id);
+            const newStatus = task.status === 'done' ? 'todo' : 'done';
+            await taskRepository.updateStatus(id, newStatus);
+            await loadTasks();
+        } catch (error) {
+            console.error('Error updating task:', error);
+        }
     }
 
-    function deleteTask(id) {
-        setTasks(prev => prev.filter(t => t.id !== id));
+    async function deleteTask(id) {
+        try {
+            await taskRepository.delete(id);
+            setTasks(prev => prev.filter(t => t.id !== id));
+        } catch (error) {
+            console.error('Error deleting task:', error);
+        }
     }
 
-    function addTask() {
-        const id = Date.now();
-        const newTask = {
-            id,
-            title: 'New Task',
-            description: 'Describe the task...',
-            assignee: 'You',
-            dueDate: new Date().toISOString().slice(0, 10),
-            frequency: 'Once',
-            completed: false,
-            subtasks: [],
-        };
-        setTasks(prev => [newTask, ...prev]);
+    async function addTask() {
+        try {
+            const newTask = {
+                task_name: 'New Task',
+                description: 'Describe the task...',
+                status: 'todo',
+                priority: 3,
+                due_date: new Date(),
+            };
+            await taskRepository.create(newTask);
+            await loadTasks();
+        } catch (error) {
+            console.error('Error adding task:', error);
+        }
     }
 
     return (
@@ -90,73 +72,58 @@ function Task() {
             </div>
 
             <div className='task-container'>
-                <div className="tasks-grid">
-                    {tasks.map(task => {
-                        const completedCount = task.subtasks.filter(s => s.completed).length;
-                        const total = task.subtasks.length;
+                {loading ? (
+                    <p>Loading tasks...</p>
+                ) : tasks.length === 0 ? (
+                    <p>No tasks yet. Click + to add your first task!</p>
+                ) : (
+                    <div className="tasks-grid">
+                        {tasks.map(task => {
+                            const completed = task.status === 'done';
+                            const priorityLabels = ['', 'High', 'Medium', 'Low', 'Very Low'];
+                            const dueDate = task.due_date ? new Date(task.due_date.seconds * 1000).toISOString().slice(0, 10) : 'No date';
 
-                        return (
-                            <article
-                                className={`task-card ${task.completed ? 'completed' : ''}`}
-                                key={task.id}
-                            >
-                                <header className="task-top">
-                                    <label className="check">
-                                        <input
-                                            type="checkbox"
-                                            checked={task.completed}
-                                            onChange={() => toggleTaskCompletion(task.id)}
-                                        />
-                                        <span className="checkmark" />
-                                    </label>
-                                    <div className="task-main">
-                                        <h3 className="task-title">{task.title}</h3>
-                                        <p className="task-desc">{task.description}</p>
+                            return (
+                                <article
+                                    className={`task-card ${completed ? 'completed' : ''}`}
+                                    key={task.id}
+                                >
+                                    <header className="task-top">
+                                        <label className="check">
+                                            <input
+                                                type="checkbox"
+                                                checked={completed}
+                                                onChange={() => toggleTaskCompletion(task.id)}
+                                            />
+                                            <span className="checkmark" />
+                                        </label>
+                                        <div className="task-main">
+                                            <h3 className="task-title">{task.task_name}</h3>
+                                            <p className="task-desc">{task.description || 'No description'}</p>
+                                        </div>
+                                    </header>
+
+                                    <div className="badges">
+                                        <span className="badge badge-assignee">{task.status}</span>
+                                        <span className="badge badge-date">{dueDate}</span>
+                                        <span className="badge badge-frequency">{priorityLabels[task.priority]}</span>
                                     </div>
-                                </header>
 
-                                <div className="badges">
-                                    <span className="badge badge-assignee">{task.assignee}</span>
-                                    <span className="badge badge-date">{task.dueDate}</span>
-                                    <span className="badge badge-frequency">{task.frequency}</span>
-                                </div>
-
-                                <section className="subtasks">
-                                    <div className="subtasks-header">
-                                        <small>
-                                            {total > 0 ? `${completedCount}/${total} completed` : 'No subtasks'}
-                                        </small>
-                                    </div>
-                                    <ul>
-                                        {task.subtasks.map(sub => (
-                                            <li key={sub.id} className={`subtask ${sub.completed ? 'done' : ''}`}>
-                                                <label>
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={sub.completed}
-                                                        onChange={() => toggleSubtask(task.id, sub.id)}
-                                                    />
-                                                    <span className="sub-label">{sub.title}</span>
-                                                </label>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </section>
-
-                                <footer className="task-actions">
-                                    <button className="btn btn-edit" title="Edit">Edit</button>
-                                    <button
-                                        className="btn btn-delete"
-                                        title="Delete"
-                                        onClick={() => deleteTask(task.id)}
-                                    >
-                                        Delete
-                                    </button>
-                                </footer>
-                            </article>
-                        );
-                    })}
-                </div>
+                                    <footer className="task-actions">
+                                        <button className="btn btn-edit" title="Edit">Edit</button>
+                                        <button
+                                            className="btn btn-delete"
+                                            title="Delete"
+                                            onClick={() => deleteTask(task.id)}
+                                        >
+                                            Delete
+                                        </button>
+                                    </footer>
+                                </article>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
 
             <button className="fab" aria-label="Add task" onClick={addTask}>
