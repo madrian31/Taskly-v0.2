@@ -4,21 +4,26 @@ import './modal.css';
 import '../../App.css';
 import Section from '../../components/shared/section/section';
 import { TaskRepository } from '../../../repository/TaskRepository';
+import { TaskService } from '../../../services/TaskService';
+import { Task } from '../../../model/Task';
+import { TaskStatus } from '../../../model/Task';
 
 const taskRepository = new TaskRepository();
+const taskService = new TaskService(taskRepository);
 
-function Task() {
-    const [tasks, setTasks] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [showModal, setShowModal] = useState(false);
+function TaskComponent() {
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [showModal, setShowModal] = useState<boolean>(false);
+    const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
     const [form, setForm] = useState({
         task_name: '',
         description: '',
-        priority: 1,
-        status: 'todo',
+        priority: 3,
+        status: 'todo' as TaskStatus,
         due_date: '',
     });
-    const [showValidationErrors, setShowValidationErrors] = useState(false);
+    const [showValidationErrors, setShowValidationErrors] = useState<boolean>(false);
 
     useEffect(() => {
         loadTasks();
@@ -27,53 +32,56 @@ function Task() {
     async function loadTasks() {
         try {
             setLoading(true);
+            console.log('Loading tasks from Firestore...');
             const tasksFromDb = await taskRepository.getAllTasks();
+            console.log('Tasks loaded:', tasksFromDb);
             setTasks(tasksFromDb);
         } catch (error) {
             console.error('Error loading tasks:', error);
+            alert('Error loading tasks: ' + (error as Error).message);
         } finally {
             setLoading(false);
         }
     }
 
-    async function toggleTaskCompletion(id) {
+    async function toggleTaskCompletion(id: string) {
         try {
             const task = tasks.find(t => t.id === id);
-            const newStatus = task.status === 'done' ? 'todo' : 'done';
-            await taskRepository.updateStatus(id, newStatus);
+            if (!task) return;
+            
+            const newStatus: TaskStatus = task.status === 'done' ? 'todo' : 'done';
+            
+            if (newStatus === 'done') {
+                await taskService.completeTask(id);
+            } else {
+                await taskRepository.updateStatus(id, newStatus);
+            }
+            
             await loadTasks();
         } catch (error) {
             console.error('Error updating task:', error);
+            alert('Error updating task: ' + (error as Error).message);
         }
     }
 
-    async function deleteTask(id) {
+    async function deleteTask(id: string) {
         try {
-            await taskRepository.delete(id);
-            setTasks(prev => prev.filter(t => t.id !== id));
+            await taskService.deleteTask(id);
+            await loadTasks(); // Changed: reload from database instead of filtering state
         } catch (error) {
             console.error('Error deleting task:', error);
-        }
-    }
-
-    async function addTask() {
-        try {
-            const newTask = {
-                task_name: 'New Task',
-                description: 'Describe the task...',
-                status: 'todo',
-                priority: 3,
-                due_date: new Date(),
-            };
-            await taskRepository.create(newTask);
-            await loadTasks();
-        } catch (error) {
-            console.error('Error adding task:', error);
+            alert('Error deleting task: ' + (error as Error).message);
         }
     }
 
     function openModal() {
-        setForm({ task_name: '', description: '', priority: 3, due_date: '' });
+        setForm({ 
+            task_name: '', 
+            description: '', 
+            priority: 3, 
+            status: 'todo',
+            due_date: '' 
+        });
         setShowValidationErrors(false);
         setShowModal(true);
     }
@@ -83,34 +91,47 @@ function Task() {
         setShowValidationErrors(false);
     }
 
-    function handleFormChange(e) {
+    function closeSuccessModal() {
+        setShowSuccessModal(false);
+    }
+
+    function handleFormChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
         const { name, value } = e.target;
         setForm(prev => ({ ...prev, [name]: value }));
     }
 
-    async function submitNewTask(e) {
+    async function submitNewTask(e?: React.FormEvent) {
         if (e && e.preventDefault) e.preventDefault();
         setShowValidationErrors(true);
 
-        // Basic client-side validation: require a task name
         if (!form.task_name || form.task_name.trim() === '') {
             return;
         }
 
         try {
-            const payload = {
-                task_name: form.task_name || 'New Task',
-                description: form.description || 'No description',
-                status: form.status || 'todo',
-                priority: Number(form.priority) || 1,
-                due_date: form.due_date ? new Date(form.due_date) : new Date(),
+            const payload: Task = {
+                task_name: form.task_name.trim(),
+                description: form.description.trim() || undefined,
+                status: form.status,
+                priority: Number(form.priority) as 1 | 2 | 3 | 4,
+                due_date: form.due_date ? new Date(form.due_date) : undefined,
             };
+            
+            console.log('Submitting task:', payload);
+            
             await taskRepository.create(payload);
+            console.log('Task created successfully!');
+            
             await loadTasks();
+            console.log('Tasks reloaded');
+            
             setShowValidationErrors(false);
             closeModal();
+            setShowSuccessModal(true);
+            
         } catch (error) {
             console.error('Error adding task from modal:', error);
+            alert('Failed to add task: ' + (error as Error).message + '\n\nCheck console for details.');
         }
     }
 
@@ -132,8 +153,12 @@ function Task() {
                     <div className="tasks-grid">
                         {tasks.map(task => {
                             const completed = task.status === 'done';
-                            const priorityLabels = ['', 'High', 'Medium', 'Low', 'Very Low'];
-                            const dueDate = task.due_date ? new Date(task.due_date.seconds * 1000).toISOString().slice(0, 10) : 'No date';
+                            const priorityLabels = ['', 'Low', 'Medium', 'High', 'Urgent'];
+                            const dueDate = task.due_date 
+                                ? (task.due_date as any).seconds 
+                                    ? new Date((task.due_date as any).seconds * 1000).toISOString().slice(0, 10)
+                                    : new Date(task.due_date).toISOString().slice(0, 10)
+                                : 'No date';
 
                             return (
                                 <article
@@ -145,7 +170,7 @@ function Task() {
                                             <input
                                                 type="checkbox"
                                                 checked={completed}
-                                                onChange={() => toggleTaskCompletion(task.id)}
+                                                onChange={() => task.id && toggleTaskCompletion(task.id)}
                                             />
                                             <span className="checkmark" />
                                         </label>
@@ -166,7 +191,7 @@ function Task() {
                                         <button
                                             className="btn btn-delete"
                                             title="Delete"
-                                            onClick={() => deleteTask(task.id)}
+                                            onClick={() => task.id && deleteTask(task.id)}
                                         >
                                             Delete
                                         </button>
@@ -178,6 +203,7 @@ function Task() {
                 )}
             </div>
 
+            {/* Add Task Modal */}
             {showModal && (
                 <div className="task-modal-overlay" onClick={closeModal}>
                     <div className="task-modal" onClick={e => e.stopPropagation()}>
@@ -197,7 +223,7 @@ function Task() {
                             <form id="taskForm" onSubmit={submitNewTask}>
                                 <div className="task-form-group">
                                     <label className="task-form-label">
-                                        Task Name<span className="task-required">*</span>
+                                        Task Name<span style={{color: '#dc2626'}}>*</span>
                                     </label>
                                     <input
                                         type="text"
@@ -209,7 +235,11 @@ function Task() {
                                         onChange={handleFormChange}
                                         required
                                     />
-                                    <div className="task-error-message" id="taskNameError" style={{ display: showValidationErrors && !form.task_name ? 'block' : 'none' }}>
+                                    <div 
+                                        className="task-error-message" 
+                                        id="taskNameError" 
+                                        style={{ display: showValidationErrors && !form.task_name ? 'block' : 'none' }}
+                                    >
                                         Task name is required
                                     </div>
                                 </div>
@@ -229,7 +259,13 @@ function Task() {
                                 <div className="task-form-row">
                                     <div className="task-form-group">
                                         <label className="task-form-label">Status</label>
-                                        <select className="task-input-field" id="taskStatus" name="status" value={form.status} onChange={handleFormChange}>
+                                        <select 
+                                            className="task-input-field" 
+                                            id="taskStatus" 
+                                            name="status" 
+                                            value={form.status} 
+                                            onChange={handleFormChange}
+                                        >
                                             <option value="todo">Todo</option>
                                             <option value="in_progress">In Progress</option>
                                             <option value="done">Done</option>
@@ -241,7 +277,13 @@ function Task() {
                                             Priority
                                             <span className="task-info-icon">i</span>
                                         </label>
-                                        <select className="task-input-field" id="taskPriority" name="priority" value={form.priority} onChange={handleFormChange}>
+                                        <select 
+                                            className="task-input-field" 
+                                            id="taskPriority" 
+                                            name="priority" 
+                                            value={form.priority} 
+                                            onChange={handleFormChange}
+                                        >
                                             <option value={1}>Low</option>
                                             <option value={2}>Medium</option>
                                             <option value={3}>High</option>
@@ -276,6 +318,76 @@ function Task() {
                 </div>
             )}
 
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <div className="task-modal-overlay" onClick={closeSuccessModal}>
+                    <div 
+                        className="task-modal" 
+                        onClick={e => e.stopPropagation()}
+                        style={{maxWidth: '400px', textAlign: 'center'}}
+                    >
+                        <div className="task-modal-header" style={{borderBottom: 'none', justifyContent: 'flex-end', padding: '12px 16px'}}>
+                            <button
+                                className="task-modal-close-btn"
+                                type="button"
+                                onClick={closeSuccessModal}
+                                aria-label="Close modal"
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <div className="task-modal-body" style={{padding: '20px 32px 32px'}}>
+                            <div style={{
+                                width: '80px',
+                                height: '80px',
+                                margin: '0 auto 24px',
+                                borderRadius: '50%',
+                                background: 'linear-gradient(135deg, rgba(124,58,237,0.1), rgba(124,58,237,0.05))',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                border: '3px solid #7c3aed'
+                            }}>
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+
+                            <h2 style={{
+                                fontSize: '1.5rem',
+                                color: '#0f172a',
+                                marginBottom: '12px',
+                                fontWeight: '600'
+                            }}>
+                                Awesome!
+                            </h2>
+                            
+                            <p style={{
+                                color: '#64748b',
+                                fontSize: '0.95rem',
+                                marginBottom: '28px'
+                            }}>
+                                Task successfully added to your list
+                            </p>
+
+                            <button 
+                                type="button" 
+                                className="task-btn task-btn-primary"
+                                onClick={closeSuccessModal}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    fontSize: '1rem'
+                                }}
+                            >
+                                Continue
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <button className="fab" aria-label="Add task" onClick={openModal}>
                 +
             </button>
@@ -283,4 +395,4 @@ function Task() {
     );
 }
 
-export default Task;
+export default TaskComponent;
