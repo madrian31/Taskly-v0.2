@@ -9,7 +9,7 @@
 /* Main content area */
 .main-content {
   flex: 1;
-  margin-left: 220px; /* account for fixed sidebar width */
+  margin-left: 240px; /* account for fixed sidebar width (matches sidebar) */
   padding: 20px;
   background: #f1f3f4;
   color: #242424;
@@ -17,7 +17,7 @@
 }
 
 /* Make main content full width on mobile */
-@media (max-width: 768px) {
+@media (max-width: 800px) {
   .main-layout-container {
     flex-direction: column;
   }

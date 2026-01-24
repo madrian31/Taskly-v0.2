@@ -1,6 +1,7 @@
 /* Sidebar container */
 .sidebar {
-  min-width: 10%;
+  width: 240px; /* fixed width to match main content margin */
+  min-width: 200px;
   height: 100vh;
   background-color: #1f2933;
   color: #ffffff;
