@@ -32,6 +32,8 @@
     padding: 24px;
     margin-bottom: 24px;
     box-shadow: var(--shadow-sm);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .header-content {
@@ -51,12 +53,14 @@
     font-weight: 600;
     color: var(--slate-900);
     margin: 0 0 8px 0;
+    text-align: left;
 }
 
 .header-subtitle {
     font-size: 1rem;
     color: var(--slate-500);
     margin: 0;
+    text-align: left;
 }
 
 .header-right {
@@ -173,7 +177,11 @@
     border-radius: 12px;
     border: 1px solid var(--slate-200);
     min-height: 400px;
+    height: auto;
     box-shadow: var(--shadow-sm);
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* Loading and Empty States */
@@ -185,6 +193,8 @@
     justify-content: center;
     padding: 80px 24px;
     text-align: center;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .loading-state p,
@@ -220,6 +230,9 @@
 /* Tasks List */
 .tasks-list {
     padding: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 /* Task Row Container */
@@ -324,6 +337,7 @@
     margin: 0;
     line-height: 1.4;
     white-space: pre-wrap;
+    text-align: left;
 }
 
 /* Status Badge */
@@ -437,8 +451,12 @@
 /* Subtasks Container */
 .subtasks-container {
     position: relative;
-    margin-left: 48px;
+    margin-left: 0;
     margin-top: 8px;
+    padding-left: 48px;
+    box-sizing: border-box;
+    width: 100%;
+    overflow: hidden;
 }
 
 /* Connector Line */
@@ -543,7 +561,7 @@
     }
     
     .subtasks-container {
-        margin-left: 24px;
+        padding-left: 24px;
     }
     
     .connector-line {
