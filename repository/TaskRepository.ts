@@ -29,13 +29,16 @@ export class TaskRepository implements ITaskRepository {
 
   // 🔹 Main tasks only (parent_id === null)
   async getMainTasks(): Promise<Task[]> {
-    const q = query(this.ref, where("parent_id", "==", null));
-    const snap = await getDocs(q);
+    // Some existing documents may not include the `parent_id` field.
+    // Querying Firestore for `where('parent_id', '==', null)` only
+    // matches documents where the field exists and is explicitly null.
+    // To be resilient, fetch all tasks and filter locally for those
+    // without a parent_id (treat undefined or null as main tasks).
+    const snap = await getDocs(this.ref);
 
-    return snap.docs.map(d => ({
-      id: d.id,
-      ...d.data()
-    })) as Task[];
+    return snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter((t: any) => t.parent_id === null || t.parent_id === undefined) as Task[];
   }
 
   // 🔹 Subtasks of a task
@@ -103,6 +106,28 @@ export class TaskRepository implements ITaskRepository {
       updated_at: now,
       completed_at: status === "done" ? now : null
     });
+  }
+
+  // 🔹 Update task fields (partial)
+  async updateTask(id: string, data: Partial<Task>): Promise<void> {
+    const now = Timestamp.now();
+    const refDoc = doc(db, "tasks", id);
+
+    const payload: any = { ...data, updated_at: now };
+
+    // Convert due_date to Firestore Timestamp if provided
+    if (data.due_date) {
+      payload.due_date = Timestamp.fromDate(data.due_date as Date);
+    }
+
+    // Remove any keys with `undefined` values because Firestore rejects them
+    Object.keys(payload).forEach((k) => {
+      if (payload[k] === undefined) {
+        delete payload[k];
+      }
+    });
+
+    await updateDoc(refDoc, payload);
   }
 
   // 🔹 Delete task (and subtasks logically)

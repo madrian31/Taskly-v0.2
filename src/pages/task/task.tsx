@@ -7,6 +7,23 @@ import { TaskRepository } from '../../../repository/TaskRepository';
 import { TaskService } from '../../../services/TaskService';
 import { Task } from '../../../model/Task';
 import { TaskStatus } from '../../../model/Task';
+import { 
+    ChevronDown, 
+    ChevronRight, 
+    Plus, 
+    Calendar, 
+    Flag, 
+    CheckCircle2, 
+    Circle, 
+    Clock, 
+    AlertCircle, 
+    MoreVertical, 
+    Search, 
+    Filter,
+    Pencil,
+    Trash,
+    X
+} from 'lucide-react';
 
 const taskRepository = new TaskRepository();
 const taskService = new TaskService(taskRepository);
@@ -19,6 +36,11 @@ function TaskComponent() {
     const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
     const [isSubtaskMode, setIsSubtaskMode] = useState<boolean>(false);
     const [parentTaskId, setParentTaskId] = useState<string | null>(null);
+    const [activeFilter, setActiveFilter] = useState<string>('all');
+    const [searchQuery, setSearchQuery] = useState<string>('');
+    const [expandedTasks, setExpandedTasks] = useState<Set<string>>(new Set());
+    const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+    const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
     const [form, setForm] = useState({
         task_name: '',
         description: '',
@@ -99,6 +121,7 @@ function TaskComponent() {
             due_date: '' 
         });
         setShowValidationErrors(false);
+        setEditingTaskId(null);
         
         if (parentId) {
             setIsSubtaskMode(true);
@@ -116,6 +139,22 @@ function TaskComponent() {
         setShowValidationErrors(false);
         setIsSubtaskMode(false);
         setParentTaskId(null);
+        setEditingTaskId(null);
+    }
+
+    function openEditModal(task: Task) {
+        setForm({
+            task_name: task.task_name || '',
+            description: task.description || '',
+            priority: task.priority || 2,
+            status: task.status || 'todo',
+            due_date: task.due_date ? (task.due_date as any).seconds ? new Date((task.due_date as any).seconds * 1000).toISOString().slice(0,10) : new Date(task.due_date as Date).toISOString().slice(0,10) : ''
+        });
+        setEditingTaskId(task.id || null);
+        // If the task has a parent_id it is a subtask — reflect that in the modal
+        setIsSubtaskMode(task.parent_id !== null && task.parent_id !== undefined);
+        setParentTaskId(task.parent_id ?? null);
+        setShowModal(true);
     }
 
     function closeSuccessModal() {
@@ -125,6 +164,101 @@ function TaskComponent() {
     function handleFormChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
         const { name, value } = e.target;
         setForm(prev => ({ ...prev, [name]: value }));
+    }
+
+    // Toggle expanded state for tasks with subtasks
+    function toggleTaskExpansion(taskId: string) {
+        setExpandedTasks(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(taskId)) {
+                newSet.delete(taskId);
+            } else {
+                newSet.add(taskId);
+            }
+            return newSet;
+        });
+    }
+
+    // Dropdown handling
+    function toggleDropdown(taskId: string) {
+        setOpenDropdownId(prev => (prev === taskId ? null : taskId));
+    }
+
+    function closeDropdown() {
+        setOpenDropdownId(null);
+    }
+
+    useEffect(() => {
+        function onDocClick() {
+            closeDropdown();
+        }
+
+        document.addEventListener('click', onDocClick);
+        return () => document.removeEventListener('click', onDocClick);
+    }, []);
+
+    // Filter tasks based on active filter and search query
+    function getFilteredTasks() {
+        let filtered = tasks;
+
+        // Apply status filter
+        if (activeFilter !== 'all') {
+            filtered = filtered.filter(task => {
+                switch (activeFilter) {
+                    case 'todo': return task.status === 'todo';
+                    case 'in_progress': return task.status === 'in_progress';
+                    case 'done': return task.status === 'done';
+                    default: return true;
+                }
+            });
+        }
+
+        // Apply search filter
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            filtered = filtered.filter(task => 
+                task.task_name.toLowerCase().includes(query) || 
+                (task.description && task.description.toLowerCase().includes(query))
+            );
+        }
+
+        return filtered;
+    }
+
+    // Get status icon and color
+    function getStatusIcon(status: TaskStatus) {
+        switch (status) {
+            case 'todo': return { icon: Circle, color: 'text-slate-400' };
+            case 'in_progress': return { icon: Clock, color: 'text-blue-500' };
+            case 'done': return { icon: CheckCircle2, color: 'text-emerald-500' };
+            default: return { icon: AlertCircle, color: 'text-red-500' };
+        }
+    }
+
+    // Get priority color and text
+    function getPriorityInfo(priority: number) {
+        switch (priority) {
+            case 1: return { color: 'text-slate-400', text: 'P4' };
+            case 2: return { color: 'text-blue-500', text: 'P3' };
+            case 3: return { color: 'text-orange-500', text: 'P2' };
+            case 4: return { color: 'text-red-500', text: 'P1' };
+            default: return { color: 'text-slate-400', text: 'P4' };
+        }
+    }
+
+    // Format due date
+    function formatDueDate(dueDate: Date | undefined) {
+        if (!dueDate) return 'No date';
+        
+        const date = dueDate as any;
+        const actualDate = date.seconds 
+            ? new Date(date.seconds * 1000) 
+            : new Date(dueDate);
+        
+        return actualDate.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric'
+        });
     }
 
     async function submitNewTask(e?: React.FormEvent) {
@@ -146,13 +280,19 @@ function TaskComponent() {
             };
             
             console.log('Submitting task:', payload);
-            
-            await taskRepository.createTask(payload);
-            console.log('Task created successfully!');
-            
+
+            if (editingTaskId) {
+                // Edit existing task
+                await taskRepository.updateTask(editingTaskId, payload);
+                console.log('Task updated successfully!');
+            } else {
+                await taskRepository.createTask(payload);
+                console.log('Task created successfully!');
+            }
+
             await loadTasks();
             console.log('Tasks reloaded');
-            
+
             setShowValidationErrors(false);
             closeModal();
             setShowSuccessModal(true);
@@ -165,98 +305,239 @@ function TaskComponent() {
 
     return (
         <Section id="task">
-            <div className="task-header">
-                <div>
-                    <h2>Your Tasks</h2>
-                    <p>Manage your tasks effectively with Taskly.</p>
+            {/* Professional Header Section */}
+            <div className="task-header-section">
+                <div className="header-content">
+                    <div className="header-left">
+                        <h1 className="header-title">Tasks</h1>
+                        <p className="header-subtitle">Manage your tasks effectively with Taskly</p>
+                    </div>
+                    <div className="header-right">
+                        <div className="search-container">
+                            <Search className="search-icon" size={20} />
+                            <input 
+                                type="text" 
+                                placeholder="Search tasks..." 
+                                className="search-input"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                        <button className="filter-button">
+                            <Filter size={20} />
+                        </button>
+                        <button className="new-task-button" onClick={() => openModal()}>
+                            <Plus size={20} />
+                            New Task
+                        </button>
+                    </div>
+                </div>
+                
+                {/* Filter Tabs */}
+                <div className="filter-tabs">
+                    {[
+                        { key: 'all', label: 'All Tasks' },
+                        { key: 'todo', label: 'To Do' },
+                        { key: 'in_progress', label: 'In Progress' },
+                        { key: 'done', label: 'Done' }
+                    ].map(filter => (
+                        <button
+                            key={filter.key}
+                            className={`filter-tab ${activeFilter === filter.key ? 'active' : ''}`}
+                            onClick={() => setActiveFilter(filter.key)}
+                        >
+                            {filter.label}
+                        </button>
+                    ))}
                 </div>
             </div>
 
-            <div className='task-container'>
+            {/* Task List */}
+            <div className="task-list-container">
                 {loading ? (
-                    <p>Loading tasks...</p>
-                ) : tasks.length === 0 ? (
-                    <p>No tasks yet. Click + to add your first task!</p>
+                    <div className="loading-state">
+                        <Clock className="animate-spin" size={24} />
+                        <p>Loading tasks...</p>
+                    </div>
+                ) : getFilteredTasks().length === 0 ? (
+                    <div className="empty-state">
+                        <Circle size={48} className="text-slate-300" />
+                        <h3>No tasks found</h3>
+                        <p>Get started by creating your first task!</p>
+                        <button className="empty-state-button" onClick={() => openModal()}>
+                            <Plus size={20} />
+                            Create Task
+                        </button>
+                    </div>
                 ) : (
-                    <div className="tasks-grid">
-                        {tasks.map(task => {
-                            const completed = task.status === 'done';
-                            const priorityLabels = ['', 'Low', 'Medium', 'High', 'Urgent'];
-                            const dueDate = task.due_date 
-                                ? (task.due_date as any).seconds 
-                                    ? new Date((task.due_date as any).seconds * 1000).toISOString().slice(0, 10)
-                                    : new Date(task.due_date).toISOString().slice(0, 10)
-                                : 'No date';
-
+                    <div className="tasks-list">
+                        {getFilteredTasks().map(task => {
                             const taskSubtasks = task.id ? subtasks[task.id] || [] : [];
+                            const hasSubtasks = taskSubtasks.length > 0;
+                            const isExpanded = task.id ? expandedTasks.has(task.id) : false;
+                            const statusInfo = getStatusIcon(task.status);
+                            const priorityInfo = getPriorityInfo(task.priority);
+                            const StatusIcon = statusInfo.icon;
 
                             return (
-                                <article
-                                    className={`task-card ${completed ? 'completed' : ''}`}
-                                    key={task.id}
-                                >
-                                    <header className="task-top">
-                                        <label className="check">
-                                            <input
-                                                type="checkbox"
-                                                checked={completed}
-                                                onChange={() => task.id && toggleTaskCompletion(task.id)}
-                                            />
-                                            <span className="checkmark" />
-                                        </label>
-                                        <div className="task-main">
-                                            <h3 className="task-title">{task.task_name}</h3>
-                                            <p className="task-desc">{task.description || 'No description'}</p>
-                                        </div>
-                                    </header>
+                                <div key={task.id} className="task-row-container">
+                                    {/* Main Task Row */}
+                                    <div className="task-row">
+                                        {/* Expand/Collapse Button */}
+                                        <button 
+                                            className="expand-button"
+                                            onClick={() => task.id && hasSubtasks && toggleTaskExpansion(task.id)}
+                                            disabled={!hasSubtasks}
+                                        >
+                                            {hasSubtasks ? (
+                                                isExpanded ? 
+                                                <ChevronDown size={16} className="text-slate-500" /> : 
+                                                <ChevronRight size={16} className="text-slate-500" />
+                                            ) : (
+                                                <div className="w-4 h-4" /> /* Placeholder for alignment */
+                                            )}
+                                        </button>
 
-                                    <div className="badges">
-                                        <span className="badge badge-assignee">{task.status}</span>
-                                        <span className="badge badge-date">{dueDate}</span>
-                                        <span className="badge badge-frequency">{priorityLabels[task.priority]}</span>
+                                        {/* Task Content */}
+                                        <div className="task-content">
+                                            <div className="task-title-row">
+                                                <h3 className="task-title">{task.task_name}</h3>
+                                            </div>
+                                            {task.description && (
+                                                <p className="task-description">{task.description}</p>
+                                            )}
+                                        </div>
+
+                                        {/* Status Badge */}
+                                        <div className="status-badge">
+                                            <StatusIcon size={16} className={statusInfo.color} />
+                                            <span className="status-text">{task.status.replace('_', ' ')}</span>
+                                        </div>
+
+                                        {/* Priority Flag */}
+                                        <div className="priority-badge">
+                                            <Flag size={16} className={priorityInfo.color} />
+                                            <span className={`priority-text ${priorityInfo.color}`}>{priorityInfo.text}</span>
+                                        </div>
+
+                                        {/* Due Date */}
+                                        <div className="due-date">
+                                            <Calendar size={16} className="text-slate-500" />
+                                            <span className="due-date-text">{formatDueDate(task.due_date)}</span>
+                                        </div>
+
+                                        {/* Actions */}
+                                        <div className="task-actions-dropdown">
+                                            <div style={{ position: 'relative' }}>
+                                                <button
+                                                    className="more-actions-button"
+                                                    onClick={(e) => { e.stopPropagation(); task.id && toggleDropdown(task.id); }}
+                                                    aria-expanded={openDropdownId === task.id}
+                                                >
+                                                    <MoreVertical size={16} className="text-slate-500" />
+                                                </button>
+
+                                                {openDropdownId === task.id && (
+                                                    <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
+                                                        {/* Add Subtask - only for main tasks */}
+                                                        {(task.parent_id === null || task.parent_id === undefined) && (
+                                                            <div className="dropdown-item" onClick={() => { closeDropdown(); task.id && openModal(task.id); }}>
+                                                                <Plus size={14} />
+                                                                <span>Add Subtask</span>
+                                                            </div>
+                                                        )}
+
+                                                        <div className="dropdown-item" onClick={() => { closeDropdown(); openEditModal(task); }}>
+                                                            <Pencil size={14} />
+                                                            <span>Edit Task</span>
+                                                        </div>
+
+                                                        <div className="dropdown-item delete" onClick={() => { closeDropdown(); task.id && deleteTask(task.id); }}>
+                                                            <Trash size={14} />
+                                                            <span>Delete Task</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    {/* Subtasks Section */}
-                                    {taskSubtasks.length > 0 && (
-                                        <div className="subtasks">
-                                            <div className="subtasks-header">Subtasks ({taskSubtasks.length})</div>
-                                            <ul>
-                                                {taskSubtasks.map(subtask => (
-                                                    <li 
-                                                        key={subtask.id} 
-                                                        className={`subtask ${subtask.status === 'done' ? 'done' : ''}`}
-                                                    >
-                                                        <label>
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={subtask.status === 'done'}
-                                                                onChange={() => subtask.id && toggleTaskCompletion(subtask.id, true)}
-                                                            />
-                                                            <span className="sub-label">{subtask.task_name}</span>
-                                                        </label>
-                                                    </li>
-                                                ))}
-                                            </ul>
+                                    {/* Subtasks */}
+                                    {hasSubtasks && isExpanded && (
+                                        <div className="subtasks-container">
+                                            {/* Vertical connector line */}
+                                            <div className="connector-line" />
+                                            
+                                            {taskSubtasks.map((subtask, index) => {
+                                                const subtaskStatusInfo = getStatusIcon(subtask.status);
+                                                const subtaskPriorityInfo = getPriorityInfo(subtask.priority);
+                                                const SubtaskStatusIcon = subtaskStatusInfo.icon;
+
+                                                return (
+                                                    <div key={subtask.id} className="subtask-row">
+                                                        {/* Horizontal connector */}
+                                                        <div className="horizontal-connector" />
+                                                        
+                                                        {/* Subtask Card */}
+                                                        <div className="subtask-card">
+                                                            <div className="expand-button-placeholder" />
+                                                            
+                                                            <div className="task-content">
+                                                                <div className="task-title-row">
+                                                                    <h4 className="subtask-title">{subtask.task_name}</h4>
+                                                                </div>
+                                                                {subtask.description && (
+                                                                    <p className="task-description">{subtask.description}</p>
+                                                                )}
+                                                            </div>
+
+                                                            <div className="status-badge">
+                                                                <SubtaskStatusIcon size={16} className={subtaskStatusInfo.color} />
+                                                                <span className="status-text">{subtask.status.replace('_', ' ')}</span>
+                                                            </div>
+
+                                                            <div className="priority-badge">
+                                                                <Flag size={16} className={subtaskPriorityInfo.color} />
+                                                                <span className={`priority-text ${subtaskPriorityInfo.color}`}>{subtaskPriorityInfo.text}</span>
+                                                            </div>
+
+                                                            <div className="due-date">
+                                                                <Calendar size={16} className="text-slate-500" />
+                                                                <span className="due-date-text">{formatDueDate(subtask.due_date)}</span>
+                                                            </div>
+
+                                                            <div className="task-actions-dropdown">
+                                                                <div style={{ position: 'relative' }}>
+                                                                    <button
+                                                                        className="more-actions-button"
+                                                                        onClick={(e) => { e.stopPropagation(); subtask.id && toggleDropdown(subtask.id); }}
+                                                                        aria-expanded={openDropdownId === subtask.id}
+                                                                    >
+                                                                        <MoreVertical size={16} className="text-slate-500" />
+                                                                    </button>
+
+                                                                    {openDropdownId === subtask.id && (
+                                                                        <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
+                                                                            <div className="dropdown-item" onClick={() => { closeDropdown(); openEditModal(subtask); }}>
+                                                                                    <Pencil size={14} />
+                                                                                    <span>Edit Task</span>
+                                                                                </div>
+
+                                                                            <div className="dropdown-item delete" onClick={() => { closeDropdown(); subtask.id && deleteTask(subtask.id); }}>
+                                                                                <Trash size={14} />
+                                                                                <span>Delete Task</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     )}
-
-                                    <footer className="task-actions">
-                                        <button 
-                                            className="btn btn-edit" 
-                                            title="Add Subtask"
-                                            onClick={() => task.id && openModal(task.id)}
-                                        >
-                                            + Subtask
-                                        </button>
-                                        <button
-                                            className="btn btn-delete"
-                                            title="Delete"
-                                            onClick={() => task.id && deleteTask(task.id)}
-                                        >
-                                            Delete
-                                        </button>
-                                    </footer>
-                                </article>
+                                </div>
                             );
                         })}
                     </div>
@@ -269,8 +550,8 @@ function TaskComponent() {
                     <div className="task-modal" onClick={e => e.stopPropagation()}>
                         <div className="task-modal-header">
                             <h2 className="task-modal-title">
-                                {isSubtaskMode ? 'Add New Subtask' : 'Add New Task'}
-                            </h2>
+                                    {editingTaskId ? (isSubtaskMode ? 'Edit Subtask' : 'Edit Task') : (isSubtaskMode ? 'Add New Subtask' : 'Add New Task')}
+                                </h2>
                             <button
                                 className="task-modal-close-btn"
                                 type="button"
@@ -374,7 +655,7 @@ function TaskComponent() {
                                 Cancel
                             </button>
                             <button type="button" className="task-btn task-btn-primary" onClick={submitNewTask}>
-                                {isSubtaskMode ? 'Add Subtask' : 'Add Task'}
+                                {editingTaskId ? (isSubtaskMode ? 'Save Subtask' : 'Save Task') : (isSubtaskMode ? 'Add Subtask' : 'Add Task')}
                             </button>
                         </div>
                     </div>
@@ -451,9 +732,6 @@ function TaskComponent() {
                 </div>
             )}
 
-            <button className="fab" aria-label="Add task" onClick={() => openModal()}>
-                +
-            </button>
         </Section>
     );
 }
