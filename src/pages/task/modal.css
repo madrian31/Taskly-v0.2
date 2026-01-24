@@ -59,6 +59,38 @@
 	margin-bottom: 14px;
 }
 
+/* allow popup positioned inside form group */
+.task-form-group { position: relative; }
+
+.custom-datepicker {
+	position: absolute;
+	left: 0;
+	top: calc(100% + 8px);
+	width: 320px;
+	background: #fff;
+	border-radius: 8px;
+	box-shadow: 0 8px 30px rgba(2,6,23,0.15);
+	border: 1px solid rgba(15,23,42,0.06);
+	z-index: 12000;
+}
+
+.custom-datepicker-header {
+	padding: 12px 16px;
+	font-weight: 600;
+	color: #0f172a;
+	border-bottom: 1px solid #eef2f6;
+}
+
+.quick-select-btn {
+	padding: 8px 12px;
+	background: #f1f5f9;
+	border: 1px solid #e6eef8;
+	border-radius: 8px;
+	cursor: pointer;
+}
+
+.quick-select-btn:hover { background: #eef2ff; }
+
 .task-form-label {
 	font-size: 0.875rem;
 	color: #475569;
