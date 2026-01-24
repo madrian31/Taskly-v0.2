@@ -5,7 +5,7 @@ import '../../App.css';
 import Section from '../../components/shared/section/section';
 import { TaskRepository } from '../../../repository/TaskRepository';
 import { TaskService } from '../../../services/TaskService';
-import { Task } from '../../../model/Task';
+import { Task, Attachment } from '../../../model/Task';
 import { TaskStatus } from '../../../model/Task';
 import { 
     ChevronDown, 
@@ -22,7 +22,11 @@ import {
     Filter,
     Pencil,
     Trash,
-    X
+    X,
+    FileUp,
+    File,
+    Download,
+    Trash2
 } from 'lucide-react';
 
 // Using native date input instead of react-datepicker for native OS picker
@@ -51,6 +55,8 @@ function TaskComponent() {
         due_date: '' as string,
     });
     const [showValidationErrors, setShowValidationErrors] = useState<boolean>(false);
+    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+    const [uploading, setUploading] = useState<boolean>(false);
 
     useEffect(() => {
         loadTasks();
@@ -124,6 +130,7 @@ function TaskComponent() {
         });
         setShowValidationErrors(false);
         setEditingTaskId(null);
+        setUploadedFiles([]);
         
         if (parentId) {
             setIsSubtaskMode(true);
@@ -142,6 +149,7 @@ function TaskComponent() {
         setIsSubtaskMode(false);
         setParentTaskId(null);
         setEditingTaskId(null);
+        setUploadedFiles([]);
     }
 
     function openEditModal(task: Task) {
@@ -170,6 +178,18 @@ function TaskComponent() {
     function handleFormChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
         const { name, value } = e.target;
         setForm(prev => ({ ...prev, [name]: value }));
+    }
+
+    function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+        const files = e.target.files;
+        if (files) {
+            const newFiles = Array.from(files);
+            setUploadedFiles(prev => [...prev, ...newFiles]);
+        }
+    }
+
+    function removeFile(index: number) {
+        setUploadedFiles(prev => prev.filter((_, i) => i !== index));
     }
 
     // using native input, no DatePicker handler needed
@@ -654,6 +674,88 @@ function TaskComponent() {
                                         value={form.due_date}
                                         onChange={handleFormChange}
                                     />
+                                </div>
+
+                                <div className="task-form-group">
+                                    <label className="task-form-label">Attachments</label>
+                                    <div style={{
+                                        border: '2px dashed #cbd5e1',
+                                        borderRadius: '8px',
+                                        padding: '16px',
+                                        textAlign: 'center',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease',
+                                        backgroundColor: '#f8fafc'
+                                    }}>
+                                        <input
+                                            type="file"
+                                            multiple
+                                            onChange={handleFileSelect}
+                                            style={{ display: 'none' }}
+                                            id="fileInput"
+                                            accept="image/*,.pdf,.doc,.docx,.txt"
+                                        />
+                                        <label htmlFor="fileInput" style={{ cursor: 'pointer', display: 'block' }}>
+                                            <FileUp size={24} style={{ margin: '0 auto 8px', color: '#7c3aed' }} />
+                                            <p style={{ margin: '8px 0 4px', color: '#334155', fontWeight: '500' }}>
+                                                Click to upload or drag files
+                                            </p>
+                                            <p style={{ margin: '0', color: '#94a3b8', fontSize: '0.875rem' }}>
+                                                Images, PDF, DOC, TXT (Max 10MB each)
+                                            </p>
+                                        </label>
+                                    </div>
+
+                                    {uploadedFiles.length > 0 && (
+                                        <div style={{ marginTop: '12px' }}>
+                                            <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '8px' }}>
+                                                Selected files: {uploadedFiles.length}
+                                            </p>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                {uploadedFiles.map((file, index) => (
+                                                    <div key={index} style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'space-between',
+                                                        padding: '8px 12px',
+                                                        backgroundColor: '#f1f5f9',
+                                                        borderRadius: '6px',
+                                                        border: '1px solid #e2e8f0'
+                                                    }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '0' }}>
+                                                            <File size={18} style={{ color: '#7c3aed', flexShrink: 0 }} />
+                                                            <span style={{
+                                                                fontSize: '0.875rem',
+                                                                color: '#334155',
+                                                                whiteSpace: 'nowrap',
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis'
+                                                            }}>
+                                                                {file.name}
+                                                            </span>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeFile(index)}
+                                                            style={{
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                cursor: 'pointer',
+                                                                padding: '4px',
+                                                                color: '#ef4444',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                flexShrink: 0
+                                                            }}
+                                                            title="Remove file"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </form>
                         </div>
