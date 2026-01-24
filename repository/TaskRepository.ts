@@ -1,4 +1,16 @@
-import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, Timestamp, getDoc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
+  Timestamp,
+  getDoc,
+  query,
+  where
+} from "firebase/firestore";
+
 import { db } from "../src/firebase/firebase";
 import { ITaskRepository } from "./interface/ITaskRepository";
 import { Task, TaskStatus } from "../model/Task";
@@ -6,7 +18,8 @@ import { Task, TaskStatus } from "../model/Task";
 export class TaskRepository implements ITaskRepository {
   private ref = collection(db, "tasks");
 
-  async getAll(): Promise<Task[]> {
+  // 🔹 Get all tasks (debug / admin use)
+  async getAllTasks(): Promise<Task[]> {
     const snap = await getDocs(this.ref);
     return snap.docs.map(d => ({
       id: d.id,
@@ -14,24 +27,43 @@ export class TaskRepository implements ITaskRepository {
     })) as Task[];
   }
 
-  async getAllTasks(): Promise<Task[]> {
-    return this.getAll();
+  // 🔹 Main tasks only (parent_id === null)
+  async getMainTasks(): Promise<Task[]> {
+    const q = query(this.ref, where("parent_id", "==", null));
+    const snap = await getDocs(q);
+
+    return snap.docs.map(d => ({
+      id: d.id,
+      ...d.data()
+    })) as Task[];
   }
 
-  async getById(id: string): Promise<Task | null> {
-    const taskDocRef = doc(db, "tasks", id);
-    const snap = await getDoc(taskDocRef);
-    if (!snap.exists()) return null;
-    return { id: snap.id, ...snap.data() } as Task;
+  // 🔹 Subtasks of a task
+  async getSubTasks(parentId: string): Promise<Task[]> {
+    const q = query(this.ref, where("parent_id", "==", parentId));
+    const snap = await getDocs(q);
+
+    return snap.docs.map(d => ({
+      id: d.id,
+      ...d.data()
+    })) as Task[];
   }
 
-  // Interface-compatible wrapper
+  // 🔹 Single task
   async getTaskById(id: string): Promise<Task | null> {
-    return this.getById(id);
+    const ref = doc(db, "tasks", id);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) return null;
+
+    return {
+      id: snap.id,
+      ...snap.data()
+    } as Task;
   }
 
-  async create(task: Task): Promise<void> {
-    // Validation: priority 1–4
+  // 🔹 Create task or subtask
+  async createTask(task: Task): Promise<void> {
     if (task.priority < 1 || task.priority > 4) {
       throw new Error("Priority must be between 1 and 4");
     }
@@ -39,39 +71,42 @@ export class TaskRepository implements ITaskRepository {
     const now = Timestamp.now();
 
     await addDoc(this.ref, {
-      ...task,
-      status: task.status || "todo",
+      task_name: task.task_name,
+      description: task.description ?? null,
+
+      parent_id: task.parent_id ?? null, // ✅ SUBTASK SUPPORT
+
+      status: task.status ?? "todo",
+      priority: task.priority,
+
+      due_date: task.due_date
+        ? Timestamp.fromDate(task.due_date)
+        : null,
+
       created_at: now,
       updated_at: now,
       completed_at: task.status === "done" ? now : null
     });
   }
 
-  // Interface-compatible wrapper
-  async createTask(task: Task): Promise<void> {
-    return this.create(task);
-  }
-
+  // 🔹 Update status
   async updateStatus(id: string, status: TaskStatus): Promise<void> {
-    const now = Timestamp.now();
-
     if (!["todo", "in_progress", "blocked", "done"].includes(status)) {
       throw new Error("Invalid status value");
     }
 
-    const taskRef = doc(db, "tasks", id);
-    await updateDoc(taskRef, {
+    const now = Timestamp.now();
+    const ref = doc(db, "tasks", id);
+
+    await updateDoc(ref, {
       status,
       updated_at: now,
       completed_at: status === "done" ? now : null
     });
   }
 
-  async delete(id: string): Promise<void> {
+  // 🔹 Delete task (and subtasks logically)
+  async deleteTask(id: string): Promise<void> {
     await deleteDoc(doc(db, "tasks", id));
-  }
-
-  async deteleTask(id: string): Promise<void> {
-    return this.delete(id);
   }
 }

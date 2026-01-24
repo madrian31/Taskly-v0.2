@@ -13,9 +13,12 @@ const taskService = new TaskService(taskRepository);
 
 function TaskComponent() {
     const [tasks, setTasks] = useState<Task[]>([]);
+    const [subtasks, setSubtasks] = useState<{ [key: string]: Task[] }>({});
     const [loading, setLoading] = useState<boolean>(true);
     const [showModal, setShowModal] = useState<boolean>(false);
     const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+    const [isSubtaskMode, setIsSubtaskMode] = useState<boolean>(false);
+    const [parentTaskId, setParentTaskId] = useState<string | null>(null);
     const [form, setForm] = useState({
         task_name: '',
         description: '',
@@ -33,9 +36,19 @@ function TaskComponent() {
         try {
             setLoading(true);
             console.log('Loading tasks from Firestore...');
-            const tasksFromDb = await taskRepository.getAllTasks();
-            console.log('Tasks loaded:', tasksFromDb);
-            setTasks(tasksFromDb);
+            const mainTasks = await taskRepository.getMainTasks();
+            console.log('Main tasks loaded:', mainTasks);
+            setTasks(mainTasks);
+
+            // Load subtasks for each main task
+            const subtasksMap: { [key: string]: Task[] } = {};
+            for (const task of mainTasks) {
+                if (task.id) {
+                    const subs = await taskRepository.getSubTasks(task.id);
+                    subtasksMap[task.id] = subs;
+                }
+            }
+            setSubtasks(subtasksMap);
         } catch (error) {
             console.error('Error loading tasks:', error);
             alert('Error loading tasks: ' + (error as Error).message);
@@ -44,9 +57,12 @@ function TaskComponent() {
         }
     }
 
-    async function toggleTaskCompletion(id: string) {
+    async function toggleTaskCompletion(id: string, isSubtask: boolean = false) {
         try {
-            const task = tasks.find(t => t.id === id);
+            const task = isSubtask 
+                ? Object.values(subtasks).flat().find(t => t.id === id)
+                : tasks.find(t => t.id === id);
+            
             if (!task) return;
             
             const newStatus: TaskStatus = task.status === 'done' ? 'todo' : 'done';
@@ -67,14 +83,14 @@ function TaskComponent() {
     async function deleteTask(id: string) {
         try {
             await taskService.deleteTask(id);
-            await loadTasks(); // Changed: reload from database instead of filtering state
+            await loadTasks();
         } catch (error) {
             console.error('Error deleting task:', error);
             alert('Error deleting task: ' + (error as Error).message);
         }
     }
 
-    function openModal() {
+    function openModal(parentId?: string) {
         setForm({ 
             task_name: '', 
             description: '', 
@@ -83,12 +99,23 @@ function TaskComponent() {
             due_date: '' 
         });
         setShowValidationErrors(false);
+        
+        if (parentId) {
+            setIsSubtaskMode(true);
+            setParentTaskId(parentId);
+        } else {
+            setIsSubtaskMode(false);
+            setParentTaskId(null);
+        }
+        
         setShowModal(true);
     }
 
     function closeModal() {
         setShowModal(false);
         setShowValidationErrors(false);
+        setIsSubtaskMode(false);
+        setParentTaskId(null);
     }
 
     function closeSuccessModal() {
@@ -115,11 +142,12 @@ function TaskComponent() {
                 status: form.status,
                 priority: Number(form.priority) as 1 | 2 | 3 | 4,
                 due_date: form.due_date ? new Date(form.due_date) : undefined,
+                parent_id: isSubtaskMode && parentTaskId ? parentTaskId : undefined,
             };
             
             console.log('Submitting task:', payload);
             
-            await taskRepository.create(payload);
+            await taskRepository.createTask(payload);
             console.log('Task created successfully!');
             
             await loadTasks();
@@ -160,6 +188,8 @@ function TaskComponent() {
                                     : new Date(task.due_date).toISOString().slice(0, 10)
                                 : 'No date';
 
+                            const taskSubtasks = task.id ? subtasks[task.id] || [] : [];
+
                             return (
                                 <article
                                     className={`task-card ${completed ? 'completed' : ''}`}
@@ -186,8 +216,38 @@ function TaskComponent() {
                                         <span className="badge badge-frequency">{priorityLabels[task.priority]}</span>
                                     </div>
 
+                                    {/* Subtasks Section */}
+                                    {taskSubtasks.length > 0 && (
+                                        <div className="subtasks">
+                                            <div className="subtasks-header">Subtasks ({taskSubtasks.length})</div>
+                                            <ul>
+                                                {taskSubtasks.map(subtask => (
+                                                    <li 
+                                                        key={subtask.id} 
+                                                        className={`subtask ${subtask.status === 'done' ? 'done' : ''}`}
+                                                    >
+                                                        <label>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={subtask.status === 'done'}
+                                                                onChange={() => subtask.id && toggleTaskCompletion(subtask.id, true)}
+                                                            />
+                                                            <span className="sub-label">{subtask.task_name}</span>
+                                                        </label>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
                                     <footer className="task-actions">
-                                        <button className="btn btn-edit" title="Edit">Edit</button>
+                                        <button 
+                                            className="btn btn-edit" 
+                                            title="Add Subtask"
+                                            onClick={() => task.id && openModal(task.id)}
+                                        >
+                                            + Subtask
+                                        </button>
                                         <button
                                             className="btn btn-delete"
                                             title="Delete"
@@ -203,12 +263,14 @@ function TaskComponent() {
                 )}
             </div>
 
-            {/* Add Task Modal */}
+            {/* Add Task/Subtask Modal */}
             {showModal && (
                 <div className="task-modal-overlay" onClick={closeModal}>
                     <div className="task-modal" onClick={e => e.stopPropagation()}>
                         <div className="task-modal-header">
-                            <h2 className="task-modal-title">Add New Task</h2>
+                            <h2 className="task-modal-title">
+                                {isSubtaskMode ? 'Add New Subtask' : 'Add New Task'}
+                            </h2>
                             <button
                                 className="task-modal-close-btn"
                                 type="button"
@@ -223,14 +285,15 @@ function TaskComponent() {
                             <form id="taskForm" onSubmit={submitNewTask}>
                                 <div className="task-form-group">
                                     <label className="task-form-label">
-                                        Task Name<span style={{color: '#dc2626'}}>*</span>
+                                        {isSubtaskMode ? 'Subtask Name' : 'Task Name'}
+                                        <span style={{color: '#dc2626'}}>*</span>
                                     </label>
                                     <input
                                         type="text"
                                         className="task-input-field"
                                         name="task_name"
                                         id="taskName"
-                                        placeholder="Enter task name"
+                                        placeholder={isSubtaskMode ? "Enter subtask name" : "Enter task name"}
                                         value={form.task_name}
                                         onChange={handleFormChange}
                                         required
@@ -240,7 +303,7 @@ function TaskComponent() {
                                         id="taskNameError" 
                                         style={{ display: showValidationErrors && !form.task_name ? 'block' : 'none' }}
                                     >
-                                        Task name is required
+                                        {isSubtaskMode ? 'Subtask name is required' : 'Task name is required'}
                                     </div>
                                 </div>
 
@@ -311,7 +374,7 @@ function TaskComponent() {
                                 Cancel
                             </button>
                             <button type="button" className="task-btn task-btn-primary" onClick={submitNewTask}>
-                                Add Task
+                                {isSubtaskMode ? 'Add Subtask' : 'Add Task'}
                             </button>
                         </div>
                     </div>
@@ -368,7 +431,7 @@ function TaskComponent() {
                                 fontSize: '0.95rem',
                                 marginBottom: '28px'
                             }}>
-                                Task successfully added to your list
+                                {isSubtaskMode ? 'Subtask' : 'Task'} successfully added to your list
                             </p>
 
                             <button 
@@ -388,7 +451,7 @@ function TaskComponent() {
                 </div>
             )}
 
-            <button className="fab" aria-label="Add task" onClick={openModal}>
+            <button className="fab" aria-label="Add task" onClick={() => openModal()}>
                 +
             </button>
         </Section>

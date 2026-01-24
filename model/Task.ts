@@ -2,6 +2,7 @@ export type TaskStatus = "todo" | "in_progress" | "blocked" | "done";
 
 export interface Task {
   id?: string;
+  parent_id?: string;
   task_name: string;
   description?: string;
   status: TaskStatus;

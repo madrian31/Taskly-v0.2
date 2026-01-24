@@ -143,6 +143,7 @@
 .subtasks-header {
 	color: var(--muted);
 	margin-bottom: 8px;
+	text-align: left;
 }
 
 .subtasks ul {

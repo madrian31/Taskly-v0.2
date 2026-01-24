@@ -1,9 +1,8 @@
-import { Task } from "../../model/Task";
+import { Task, TaskStatus } from "../../model/Task";
 
-export interface ITaskRepository {
-    getAllTasks(): Promise<Task[]>;
-    getTaskById(id: string): Promise<Task | null>;
-    createTask(task: Task): Promise<void>;
-    updateStatus(id: string, status: string): Promise<void>;
-    deleteTask(id: string): Promise<void>;
+export interface ITaskService {
+    completeTask(taskId: string): Promise<void>;
+    reopenTask(taskId: string): Promise<void>;
+    updateStatus(taskId: string, status: TaskStatus): Promise<void>;
+    deleteTask(taskId: string): Promise<void>;
 }
