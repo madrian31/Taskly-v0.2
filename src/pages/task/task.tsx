@@ -25,6 +25,8 @@ import {
     X
 } from 'lucide-react';
 
+// Using native date input instead of react-datepicker for native OS picker
+
 const taskRepository = new TaskRepository();
 const taskService = new TaskService(taskRepository);
 
@@ -46,7 +48,7 @@ function TaskComponent() {
         description: '',
         priority: 3,
         status: 'todo' as TaskStatus,
-        due_date: '',
+        due_date: '' as string,
     });
     const [showValidationErrors, setShowValidationErrors] = useState<boolean>(false);
 
@@ -148,7 +150,11 @@ function TaskComponent() {
             description: task.description || '',
             priority: task.priority || 2,
             status: task.status || 'todo',
-            due_date: task.due_date ? (task.due_date as any).seconds ? new Date((task.due_date as any).seconds * 1000).toISOString().slice(0,10) : new Date(task.due_date as Date).toISOString().slice(0,10) : ''
+                due_date: task.due_date
+                    ? ((task.due_date as any).seconds
+                        ? new Date((task.due_date as any).seconds * 1000).toISOString().slice(0,10)
+                        : new Date(task.due_date as Date).toISOString().slice(0,10))
+                    : ''
         });
         setEditingTaskId(task.id || null);
         // If the task has a parent_id it is a subtask — reflect that in the modal
@@ -165,6 +171,8 @@ function TaskComponent() {
         const { name, value } = e.target;
         setForm(prev => ({ ...prev, [name]: value }));
     }
+
+    // using native input, no DatePicker handler needed
 
     // Toggle expanded state for tasks with subtasks
     function toggleTaskExpansion(taskId: string) {
