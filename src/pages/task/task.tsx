@@ -5,6 +5,7 @@ import '../../App.css';
 import Section from '../../components/shared/section/section';
 import { TaskRepository } from '../../../repository/TaskRepository';
 import { TaskService } from '../../../services/TaskService';
+import { FileUploadService } from '../../../services/FileUploadService';
 import { Task, Attachment } from '../../../model/Task';
 import { TaskStatus } from '../../../model/Task';
 import { 
@@ -26,13 +27,15 @@ import {
     FileUp,
     File,
     Download,
-    Trash2
+    Trash2,
+    Image as ImageIcon
 } from 'lucide-react';
 
 // Using native date input instead of react-datepicker for native OS picker
 
 const taskRepository = new TaskRepository();
-const taskService = new TaskService(taskRepository);
+const fileUploadService = new FileUploadService();
+const taskService = new TaskService(taskRepository, fileUploadService);
 
 function TaskComponent() {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -56,6 +59,7 @@ function TaskComponent() {
     });
     const [showValidationErrors, setShowValidationErrors] = useState<boolean>(false);
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+    const [attachments, setAttachments] = useState<Attachment[]>([]);
     const [uploading, setUploading] = useState<boolean>(false);
 
     useEffect(() => {
@@ -131,6 +135,7 @@ function TaskComponent() {
         setShowValidationErrors(false);
         setEditingTaskId(null);
         setUploadedFiles([]);
+        setAttachments([]);
         
         if (parentId) {
             setIsSubtaskMode(true);
@@ -150,6 +155,7 @@ function TaskComponent() {
         setParentTaskId(null);
         setEditingTaskId(null);
         setUploadedFiles([]);
+        setAttachments([]);
     }
 
     function openEditModal(task: Task) {
@@ -168,6 +174,9 @@ function TaskComponent() {
         // If the task has a parent_id it is a subtask — reflect that in the modal
         setIsSubtaskMode(task.parent_id !== null && task.parent_id !== undefined);
         setParentTaskId(task.parent_id ?? null);
+        // Load existing attachments
+        setAttachments(task.attachments || []);
+        setUploadedFiles([]);
         setShowModal(true);
     }
 
@@ -190,6 +199,15 @@ function TaskComponent() {
 
     function removeFile(index: number) {
         setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+    }
+
+    function removeAttachment(attachmentId: string) {
+        setAttachments(prev => prev.filter(att => att.id !== attachmentId));
+    }
+
+    function isImageAttachment(attachment: Attachment): boolean {
+        const imageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+        return imageTypes.includes(attachment.fileType.toLowerCase());
     }
 
     // using native input, no DatePicker handler needed
@@ -298,6 +316,15 @@ function TaskComponent() {
         }
 
         try {
+            setUploading(true);
+
+            // Handle file uploads if there are new files
+            let uploadedAttachments: Attachment[] = [...attachments];
+            if (uploadedFiles.length > 0) {
+                const newAttachments = await taskService.uploadTaskFiles(uploadedFiles);
+                uploadedAttachments = [...attachments, ...newAttachments];
+            }
+
             const payload: Task = {
                 task_name: form.task_name.trim(),
                 description: form.description.trim() || undefined,
@@ -305,6 +332,7 @@ function TaskComponent() {
                 priority: Number(form.priority) as 1 | 2 | 3 | 4,
                 due_date: form.due_date ? new Date(form.due_date) : undefined,
                 parent_id: isSubtaskMode && parentTaskId ? parentTaskId : undefined,
+                attachments: uploadedAttachments.length > 0 ? uploadedAttachments : undefined,
             };
             
             console.log('Submitting task:', payload);
@@ -328,6 +356,8 @@ function TaskComponent() {
         } catch (error) {
             console.error('Error adding task from modal:', error);
             alert('Failed to add task: ' + (error as Error).message + '\n\nCheck console for details.');
+        } finally {
+            setUploading(false);
         }
     }
 
@@ -694,8 +724,9 @@ function TaskComponent() {
                                             style={{ display: 'none' }}
                                             id="fileInput"
                                             accept="image/*,.pdf,.doc,.docx,.txt"
+                                            disabled={uploading}
                                         />
-                                        <label htmlFor="fileInput" style={{ cursor: 'pointer', display: 'block' }}>
+                                        <label htmlFor="fileInput" style={{ cursor: uploading ? 'not-allowed' : 'pointer', display: 'block', opacity: uploading ? 0.6 : 1 }}>
                                             <FileUp size={24} style={{ margin: '0 auto 8px', color: '#7c3aed' }} />
                                             <p style={{ margin: '8px 0 4px', color: '#334155', fontWeight: '500' }}>
                                                 Click to upload or drag files
@@ -706,10 +737,132 @@ function TaskComponent() {
                                         </label>
                                     </div>
 
+                                    {/* Existing Attachments */}
+                                    {attachments.length > 0 && (
+                                        <div style={{ marginTop: '16px' }}>
+                                            <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '8px', fontWeight: '500' }}>
+                                                Current Attachments: {attachments.length}
+                                            </p>
+                                            
+                                            {/* Image Previews */}
+                                            {attachments.some(att => isImageAttachment(att)) && (
+                                                <div style={{ marginBottom: '12px' }}>
+                                                    <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '8px' }}>Images:</p>
+                                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '8px' }}>
+                                                        {attachments.filter(att => isImageAttachment(att)).map((attachment) => (
+                                                            <div key={attachment.id} style={{ position: 'relative', borderRadius: '6px', overflow: 'hidden', border: '1px solid #e2e8f0', backgroundColor: '#f1f5f9' }}>
+                                                                <img 
+                                                                    src={attachment.fileUrl} 
+                                                                    alt={attachment.fileName}
+                                                                    style={{ width: '100%', height: '80px', objectFit: 'cover' }}
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => removeAttachment(attachment.id)}
+                                                                    style={{
+                                                                        position: 'absolute',
+                                                                        top: '2px',
+                                                                        right: '2px',
+                                                                        background: 'rgba(239, 68, 68, 0.9)',
+                                                                        border: 'none',
+                                                                        color: 'white',
+                                                                        borderRadius: '50%',
+                                                                        width: '20px',
+                                                                        height: '20px',
+                                                                        cursor: 'pointer',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'center',
+                                                                        padding: '0',
+                                                                        fontSize: '12px'
+                                                                    }}
+                                                                    title={`Remove ${attachment.fileName}`}
+                                                                >
+                                                                    ×
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Other Files */}
+                                            {attachments.some(att => !isImageAttachment(att)) && (
+                                                <div>
+                                                    <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '8px' }}>Files:</p>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                        {attachments.filter(att => !isImageAttachment(att)).map((attachment) => (
+                                                            <div key={attachment.id} style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'space-between',
+                                                                padding: '8px 12px',
+                                                                backgroundColor: '#f1f5f9',
+                                                                borderRadius: '6px',
+                                                                border: '1px solid #e2e8f0'
+                                                            }}>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '0' }}>
+                                                                    <File size={18} style={{ color: '#7c3aed', flexShrink: 0 }} />
+                                                                    <span style={{
+                                                                        fontSize: '0.875rem',
+                                                                        color: '#334155',
+                                                                        whiteSpace: 'nowrap',
+                                                                        overflow: 'hidden',
+                                                                        textOverflow: 'ellipsis'
+                                                                    }}>
+                                                                        {attachment.fileName}
+                                                                    </span>
+                                                                </div>
+                                                                <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                                                                    <a 
+                                                                        href={attachment.fileUrl} 
+                                                                        target="_blank" 
+                                                                        rel="noopener noreferrer"
+                                                                        style={{
+                                                                            background: 'none',
+                                                                            border: 'none',
+                                                                            cursor: 'pointer',
+                                                                            padding: '4px',
+                                                                            color: '#3b82f6',
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            flexShrink: 0
+                                                                        }}
+                                                                        title="Download file"
+                                                                    >
+                                                                        <Download size={16} />
+                                                                    </a>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => removeAttachment(attachment.id)}
+                                                                        style={{
+                                                                            background: 'none',
+                                                                            border: 'none',
+                                                                            cursor: 'pointer',
+                                                                            padding: '4px',
+                                                                            color: '#ef4444',
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            flexShrink: 0
+                                                                        }}
+                                                                        title="Remove file"
+                                                                    >
+                                                                        <Trash2 size={16} />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* New Files to Upload */}
                                     {uploadedFiles.length > 0 && (
-                                        <div style={{ marginTop: '12px' }}>
-                                            <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '8px' }}>
-                                                Selected files: {uploadedFiles.length}
+                                        <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e2e8f0' }}>
+                                            <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '8px', fontWeight: '500' }}>
+                                                New Files to Upload: {uploadedFiles.length}
                                             </p>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                                 {uploadedFiles.map((file, index) => (
@@ -718,12 +871,16 @@ function TaskComponent() {
                                                         alignItems: 'center',
                                                         justifyContent: 'space-between',
                                                         padding: '8px 12px',
-                                                        backgroundColor: '#f1f5f9',
+                                                        backgroundColor: '#ecfdf5',
                                                         borderRadius: '6px',
-                                                        border: '1px solid #e2e8f0'
+                                                        border: '1px solid #d1fae5'
                                                     }}>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '0' }}>
-                                                            <File size={18} style={{ color: '#7c3aed', flexShrink: 0 }} />
+                                                            {fileUploadService.isImageFile(file) ? (
+                                                                <ImageIcon size={18} style={{ color: '#10b981', flexShrink: 0 }} />
+                                                            ) : (
+                                                                <File size={18} style={{ color: '#10b981', flexShrink: 0 }} />
+                                                            )}
                                                             <span style={{
                                                                 fontSize: '0.875rem',
                                                                 color: '#334155',
@@ -732,6 +889,9 @@ function TaskComponent() {
                                                                 textOverflow: 'ellipsis'
                                                             }}>
                                                                 {file.name}
+                                                            </span>
+                                                            <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                                                                ({fileUploadService.isImageFile(file) ? 'Image → images folder' : 'File → files folder'})
                                                             </span>
                                                         </div>
                                                         <button
@@ -761,11 +921,17 @@ function TaskComponent() {
                         </div>
 
                         <div className="task-modal-footer">
-                            <button type="button" className="task-btn task-btn-cancel" onClick={closeModal}>
+                            <button type="button" className="task-btn task-btn-cancel" onClick={closeModal} disabled={uploading}>
                                 Cancel
                             </button>
-                            <button type="button" className="task-btn task-btn-primary" onClick={submitNewTask}>
-                                {editingTaskId ? (isSubtaskMode ? 'Save Subtask' : 'Save Task') : (isSubtaskMode ? 'Add Subtask' : 'Add Task')}
+                            <button 
+                                type="button" 
+                                className="task-btn task-btn-primary" 
+                                onClick={submitNewTask}
+                                disabled={uploading}
+                                style={{ opacity: uploading ? 0.6 : 1, cursor: uploading ? 'not-allowed' : 'pointer' }}
+                            >
+                                {uploading ? 'Uploading...' : (editingTaskId ? (isSubtaskMode ? 'Save Subtask' : 'Save Task') : (isSubtaskMode ? 'Add Subtask' : 'Add Task'))}
                             </button>
                         </div>
                     </div>

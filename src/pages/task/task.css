@@ -1008,3 +1008,138 @@
         width: 100%;
     }
 }
+
+/* Extra Small Devices (≤478px) - Specific for narrow phones like 478x824 */
+@media (max-width: 478px) {
+    #task {
+        padding: 6px;
+    }
+    
+    .task-header-section {
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .header-title {
+        font-size: 1.1rem;
+    }
+    
+    .header-subtitle {
+        font-size: 0.75rem;
+    }
+    
+    .search-input {
+        padding: 6px 8px 6px 28px;
+        font-size: 12px;
+        border-radius: 6px;
+    }
+    
+    .search-icon {
+        width: 16px;
+        height: 16px;
+        left: 6px;
+    }
+    
+    .filter-tabs {
+        gap: 3px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .filter-tab {
+        padding: 6px 10px;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+    
+    .task-row {
+        padding: 10px;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    
+    .task-title {
+        font-size: 14px;
+        font-weight: 600;
+    }
+    
+    .task-description {
+        font-size: 12px;
+        color: var(--slate-500);
+    }
+    
+    /* Stack badges in 2 rows for better visibility */
+    .status-badge {
+        padding: 4px 8px;
+        font-size: 10px;
+        border-radius: 4px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .status-text {
+        font-size: 10px;
+        font-weight: 500;
+    }
+    
+    .priority-badge {
+        padding: 4px 8px;
+        font-size: 10px;
+        border-radius: 4px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .priority-text {
+        font-size: 10px;
+        font-weight: 600;
+    }
+    
+    .due-date {
+        padding: 4px 8px;
+        font-size: 10px;
+        border-radius: 4px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .due-date-text {
+        font-size: 10px;
+    }
+    
+    .more-actions-button {
+        flex-shrink: 0;
+        padding: 6px;
+        border-radius: 4px;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .more-actions-button:hover {
+        background: #e2e8f0;
+    }
+    
+    .more-actions-button svg {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .subtask-card {
+        padding: 8px 10px;
+    }
+    
+    .subtask-title {
+        font-size: 13px;
+    }
+}
