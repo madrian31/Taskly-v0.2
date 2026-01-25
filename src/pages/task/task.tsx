@@ -321,7 +321,9 @@ function TaskComponent() {
             // Handle file uploads if there are new files
             let uploadedAttachments: Attachment[] = [...attachments];
             if (uploadedFiles.length > 0) {
+                console.log(`[task.tsx] Uploading ${uploadedFiles.length} new file(s)`);
                 const newAttachments = await taskService.uploadTaskFiles(uploadedFiles);
+                console.log(`[task.tsx] Got ${newAttachments.length} attachment(s) with URLs`);
                 uploadedAttachments = [...attachments, ...newAttachments];
             }
 
@@ -336,6 +338,7 @@ function TaskComponent() {
             };
             
             console.log('Submitting task:', payload);
+            console.log(`[task.tsx] Task has ${uploadedAttachments.length} attachment(s)`);
 
             if (editingTaskId) {
                 // Edit existing task
@@ -864,56 +867,102 @@ function TaskComponent() {
                                             <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '8px', fontWeight: '500' }}>
                                                 New Files to Upload: {uploadedFiles.length}
                                             </p>
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                                {uploadedFiles.map((file, index) => (
-                                                    <div key={index} style={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'space-between',
-                                                        padding: '8px 12px',
-                                                        backgroundColor: '#ecfdf5',
-                                                        borderRadius: '6px',
-                                                        border: '1px solid #d1fae5'
-                                                    }}>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '0' }}>
-                                                            {fileUploadService.isImageFile(file) ? (
-                                                                <ImageIcon size={18} style={{ color: '#10b981', flexShrink: 0 }} />
-                                                            ) : (
-                                                                <File size={18} style={{ color: '#10b981', flexShrink: 0 }} />
-                                                            )}
-                                                            <span style={{
-                                                                fontSize: '0.875rem',
-                                                                color: '#334155',
-                                                                whiteSpace: 'nowrap',
-                                                                overflow: 'hidden',
-                                                                textOverflow: 'ellipsis'
-                                                            }}>
-                                                                {file.name}
-                                                            </span>
-                                                            <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-                                                                ({fileUploadService.isImageFile(file) ? 'Image → images folder' : 'File → files folder'})
-                                                            </span>
-                                                        </div>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => removeFile(index)}
-                                                            style={{
-                                                                background: 'none',
-                                                                border: 'none',
-                                                                cursor: 'pointer',
-                                                                padding: '4px',
-                                                                color: '#ef4444',
+                                            
+                                            {/* Image Previews */}
+                                            {uploadedFiles.some(f => fileUploadService.isImageFile(f)) && (
+                                                <div style={{ marginBottom: '12px' }}>
+                                                    <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '8px' }}>Images:</p>
+                                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '8px' }}>
+                                                        {uploadedFiles.filter(f => fileUploadService.isImageFile(f)).map((file, index) => (
+                                                            <div key={index} style={{ position: 'relative', borderRadius: '6px', overflow: 'hidden', border: '1px solid #d1fae5', backgroundColor: '#f0fdf4' }}>
+                                                                <img 
+                                                                    src={URL.createObjectURL(file)} 
+                                                                    alt={file.name}
+                                                                    style={{ width: '100%', height: '80px', objectFit: 'cover' }}
+                                                                    title={file.name}
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => removeFile(uploadedFiles.indexOf(file))}
+                                                                    style={{
+                                                                        position: 'absolute',
+                                                                        top: '2px',
+                                                                        right: '2px',
+                                                                        background: 'rgba(239, 68, 68, 0.9)',
+                                                                        border: 'none',
+                                                                        color: 'white',
+                                                                        borderRadius: '50%',
+                                                                        width: '20px',
+                                                                        height: '20px',
+                                                                        cursor: 'pointer',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'center',
+                                                                        padding: '0',
+                                                                        fontSize: '12px'
+                                                                    }}
+                                                                    title={`Remove ${file.name}`}
+                                                                >
+                                                                    ×
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Other Files */}
+                                            {uploadedFiles.some(f => !fileUploadService.isImageFile(f)) && (
+                                                <div>
+                                                    <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '8px' }}>Files:</p>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                        {uploadedFiles.filter(f => !fileUploadService.isImageFile(f)).map((file, index) => (
+                                                            <div key={index} style={{
                                                                 display: 'flex',
                                                                 alignItems: 'center',
-                                                                flexShrink: 0
-                                                            }}
-                                                            title="Remove file"
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>
+                                                                justifyContent: 'space-between',
+                                                                padding: '8px 12px',
+                                                                backgroundColor: '#ecfdf5',
+                                                                borderRadius: '6px',
+                                                                border: '1px solid #d1fae5'
+                                                            }}>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '0' }}>
+                                                                    <File size={18} style={{ color: '#10b981', flexShrink: 0 }} />
+                                                                    <span style={{
+                                                                        fontSize: '0.875rem',
+                                                                        color: '#334155',
+                                                                        whiteSpace: 'nowrap',
+                                                                        overflow: 'hidden',
+                                                                        textOverflow: 'ellipsis'
+                                                                    }}>
+                                                                        {file.name}
+                                                                    </span>
+                                                                    <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                                                                        ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                                                                    </span>
+                                                                </div>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => removeFile(uploadedFiles.indexOf(file))}
+                                                                    style={{
+                                                                        background: 'none',
+                                                                        border: 'none',
+                                                                        cursor: 'pointer',
+                                                                        padding: '4px',
+                                                                        color: '#ef4444',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        flexShrink: 0
+                                                                    }}
+                                                                    title="Remove file"
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            </div>
+                                                        ))}
                                                     </div>
-                                                ))}
-                                            </div>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>

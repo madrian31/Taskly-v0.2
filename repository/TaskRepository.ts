@@ -86,6 +86,8 @@ export class TaskRepository implements ITaskRepository {
         ? Timestamp.fromDate(task.due_date)
         : null,
 
+      attachments: task.attachments ?? null, // ✅ ADD ATTACHMENTS
+
       created_at: now,
       updated_at: now,
       completed_at: task.status === "done" ? now : null

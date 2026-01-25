@@ -40,7 +40,9 @@ export class TaskService {
         }
 
         try {
+            console.log(`[TaskService] Starting file upload for ${files.length} file(s)`);
             const uploadResults = await this.fileUploadService.uploadMultipleFiles(files);
+            console.log(`[TaskService] File upload successful, got ${uploadResults.length} results`);
             
             return uploadResults.map((result, index) => ({
                 id: `attachment_${Date.now()}_${index}`,

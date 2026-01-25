@@ -237,7 +237,7 @@
     padding: 16px;
     width: 100%;
     box-sizing: border-box;
-    overflow-x: hidden;
+    /* overflow-x: hidden; */
 }
 
 /* Task Row Container */

@@ -1,0 +1,1 @@
+import{j as t,O as s}from"./vendor_react-ByBjJ8Oe.js";import"./vendor-DuPUYBON.js";function n(){return t.jsx("div",{className:"layout",children:t.jsx("main",{className:"content",children:t.jsx(s,{})})})}export{n as default};
