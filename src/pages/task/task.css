@@ -74,6 +74,7 @@
     position: relative;
     width: 264px;
     flex: 0 0 auto;
+    box-sizing: border-box;
 }
 
 .search-icon {
@@ -92,6 +93,9 @@
     font-size: 14px;
     outline: none;
     transition: border-color 0.2s;
+    background-color: #ffffff;
+    color: var(--slate-900);
+    box-sizing: border-box;
 }
 
 .search-input:focus {
@@ -1174,6 +1178,12 @@
         gap: 4px;
     }
     
+    .search-container {
+        width: 100%;
+        flex: 1;
+        min-width: 0;
+    }
+    
     .search-input {
         padding: 5px 6px 5px 24px;
         font-size: 11px;
@@ -1206,19 +1216,23 @@
         height: 14px;
     }
     
-    /* Task row - single column layout */
+    /* Task row - MUST be flex with wrap to show content first, badges second */
     .task-row {
-        flex-direction: column;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
         gap: 6px;
         padding: 8px;
         background: white;
         border-radius: 6px;
         border: 1px solid var(--slate-200);
+        align-items: flex-start;
     }
     
     .task-content {
         width: 100%;
         order: -1;
+        flex: 0 0 100%;
     }
     
     .task-title {
@@ -1234,20 +1248,21 @@
         word-break: break-word;
     }
     
-    /* Badges in a single row with flex wrap */
+    /* Badges - MUST stay inline and wrap horizontally */
     .status-badge,
     .priority-badge,
     .due-date {
         padding: 3px 6px;
         font-size: 9px;
         border-radius: 3px;
-        display: inline-flex;
+        display: inline-flex !important;
         align-items: center;
         gap: 3px;
         background: #f1f5f9;
         border: 1px solid #e2e8f0;
         flex: 0 0 auto;
         white-space: nowrap;
+        order: 1;
     }
     
     .status-text,
@@ -1263,6 +1278,14 @@
         height: 12px;
     }
     
+    /* Menu button */
+    .task-actions-dropdown {
+        flex: 0 0 auto;
+        order: 2;
+        display: flex;
+        align-items: center;
+    }
+    
     .more-actions-button {
         flex-shrink: 0;
         padding: 4px;
@@ -1270,6 +1293,8 @@
         background: transparent;
         border: none;
         cursor: pointer;
+        display: flex;
+        align-items: center;
     }
     
     .more-actions-button svg {
@@ -1278,7 +1303,9 @@
     }
     
     .expand-button {
+        flex: 0 0 auto;
         padding: 4px;
+        order: 0;
     }
     
     .expand-button svg {
@@ -1297,5 +1324,198 @@
     
     .subtask-row {
         margin-bottom: 4px;
+    }
+}
+
+/* Super-narrow devices (< 338px) - Extremely small phones */
+@media (max-width: 338px) {
+    #task {
+        padding: 2px;
+    }
+    
+    .task-header-section {
+        padding: 6px;
+        margin-bottom: 6px;
+        border-radius: 4px;
+    }
+    
+    .header-content {
+        gap: 4px;
+        margin-bottom: 6px;
+    }
+    
+    .header-title {
+        font-size: 0.95rem;
+        margin-bottom: 2px;
+    }
+    
+    .header-subtitle {
+        font-size: 0.65rem;
+    }
+    
+    .header-right {
+        gap: 2px;
+        width: 100%;
+    }
+    
+    .search-container {
+        width: 100%;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    
+    .search-input {
+        padding: 4px 4px 4px 20px;
+        font-size: 10px;
+        border-radius: 4px;
+    }
+    
+    .search-icon {
+        width: 12px;
+        height: 12px;
+        left: 4px;
+    }
+    
+    .filter-button {
+        flex: 0 0 32px;
+        padding: 6px;
+    }
+    
+    .filter-button svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .filter-tabs {
+        gap: 2px;
+        padding-top: 6px;
+    }
+    
+    .filter-tab {
+        padding: 4px 6px;
+        font-size: 9px;
+    }
+    
+    .new-task-button {
+        width: 100%;
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+    
+    .new-task-button svg {
+        width: 12px;
+        height: 12px;
+    }
+    
+    /* Stacked layout for ultra-narrow */
+    .task-row {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 4px;
+        padding: 6px;
+        background: white;
+        border-radius: 4px;
+        border: 1px solid var(--slate-200);
+        align-items: flex-start;
+    }
+    
+    .task-content {
+        width: 100%;
+        order: -1;
+        flex: 0 0 100%;
+    }
+    
+    .task-title {
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 2px;
+        line-height: 1.2;
+    }
+    
+    .task-description {
+        font-size: 10px;
+        color: var(--slate-500);
+        line-height: 1.2;
+        word-break: break-word;
+    }
+    
+    /* Badges - stacked on separate row */
+    .status-badge,
+    .priority-badge,
+    .due-date {
+        padding: 2px 4px;
+        font-size: 8px;
+        border-radius: 2px;
+        display: inline-flex !important;
+        align-items: center;
+        gap: 2px;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        flex: 0 0 auto;
+        white-space: nowrap;
+        order: 1;
+    }
+    
+    .status-text,
+    .priority-text,
+    .due-date-text {
+        font-size: 8px;
+    }
+    
+    .status-badge svg,
+    .priority-badge svg,
+    .due-date svg {
+        width: 10px;
+        height: 10px;
+    }
+    
+    /* Compact menu button */
+    .task-actions-dropdown {
+        flex: 0 0 auto;
+        order: 2;
+        display: flex;
+        align-items: center;
+    }
+    
+    .more-actions-button {
+        flex-shrink: 0;
+        padding: 3px;
+        border-radius: 2px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+    
+    .more-actions-button svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .expand-button {
+        flex: 0 0 auto;
+        padding: 3px;
+        order: 0;
+    }
+    
+    .expand-button svg {
+        width: 12px;
+        height: 12px;
+    }
+    
+    /* Subtasks */
+    .subtask-card {
+        padding: 4px 6px;
+        gap: 4px;
+    }
+    
+    .subtask-title {
+        font-size: 11px;
+    }
+    
+    .subtask-row {
+        margin-bottom: 3px;
     }
 }
