@@ -28,7 +28,52 @@ export class TaskService {
 
     // Delete a task (can extend to delete subtasks too)
     async deleteTask(taskId: string): Promise<void> {
-        await this.taskRepository.deleteTask(taskId);
+        try {
+            // Try to delete attachments for the main task
+            const task = await this.taskRepository.getTaskById(taskId);
+            if (task && task.attachments && this.fileUploadService) {
+                for (const att of task.attachments) {
+                    try {
+                        await this.fileUploadService.deleteFile(att.fileUrl);
+                    } catch (err) {
+                        console.error('Failed to delete attachment for task:', att.fileUrl, err);
+                    }
+                }
+            }
+
+            // Also delete attachments (and docs) for subtasks
+            try {
+                const subtasks = await this.taskRepository.getSubTasks(taskId);
+                for (const sub of subtasks) {
+                    if (sub && sub.attachments && this.fileUploadService) {
+                        for (const satt of sub.attachments) {
+                            try {
+                                await this.fileUploadService.deleteFile(satt.fileUrl);
+                            } catch (err) {
+                                console.error('Failed to delete attachment for subtask:', satt.fileUrl, err);
+                            }
+                        }
+                    }
+
+                    // delete the subtask document
+                    if (sub.id) {
+                        try {
+                            await this.taskRepository.deleteTask(sub.id);
+                        } catch (err) {
+                            console.error('Failed to delete subtask doc:', sub.id, err);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to fetch subtasks for deletion:', err);
+            }
+
+            // Finally delete the main task document
+            await this.taskRepository.deleteTask(taskId);
+        } catch (error) {
+            console.error('Error deleting task:', error);
+            throw error;
+        }
     }
 
     /**

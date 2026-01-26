@@ -462,7 +462,7 @@
     padding-left: 48px;
     box-sizing: border-box;
     width: 100%;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 /* Connector Line */

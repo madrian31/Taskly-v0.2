@@ -201,8 +201,25 @@ function TaskComponent() {
         setUploadedFiles(prev => prev.filter((_, i) => i !== index));
     }
 
-    function removeAttachment(attachmentId: string) {
-        setAttachments(prev => prev.filter(att => att.id !== attachmentId));
+    async function removeAttachment(attachmentId: string) {
+        const attachment = attachments.find(att => att.id === attachmentId);
+
+        // If editing an existing task, remove from storage + update Firestore
+        if (editingTaskId && attachment) {
+            try {
+                setUploading(true);
+                await taskService.removeTaskAttachment(editingTaskId, attachmentId, attachment);
+                setAttachments(prev => prev.filter(att => att.id !== attachmentId));
+            } catch (error) {
+                console.error('Error removing attachment:', error);
+                alert('Failed to remove attachment: ' + (error as Error).message);
+            } finally {
+                setUploading(false);
+            }
+        } else {
+            // local-only removal (new task not yet saved)
+            setAttachments(prev => prev.filter(att => att.id !== attachmentId));
+        }
     }
 
     function isImageAttachment(attachment: Attachment): boolean {
