@@ -1,1 +1,0 @@
-import{j as s}from"./vendor_react-ByBjJ8Oe.js";import{S as r}from"./index-BEVx0X8b.js";/* empty css            */import"./vendor-DuPUYBON.js";import"./vendor_firebase-kU5F968d.js";function m(){return s.jsxs(r,{id:"users",children:[s.jsx("h1",{children:"Users Page"}),s.jsx("p",{children:"This is the users page."})]})}export{m as default};

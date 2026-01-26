@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { User } from 'firebase/auth'
 import Section from '../../components/shared/section/section'
 import AuthService from '../../../services/authService'
+import UsersRepository from '../../../repository/UsersRepository'
+import { User as FirebaseUser } from 'firebase/auth'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -11,9 +13,8 @@ export default function Login() {
   useEffect(() => {
     const unsubscribe = AuthService.onAuthStateChanged((user: User | null) => {
       if (user) {
-        // Force a full page load to ensure the home page is fully refreshed
-        const target = `${window.location.origin}${window.location.pathname}?reload=1#/home`
-        window.location.href = target
+        // Use SPA navigation to dashboard when already authenticated
+        navigate('/dashboard')
       }
       setLoading(false)
     })
@@ -25,7 +26,9 @@ export default function Login() {
     try {
       const result = await AuthService.signInWithGoogle()
       if (result && result.user) {
-        const target = `${window.location.origin}${window.location.pathname}?reload=1#/dashboard`
+        // Immediately redirect to clear popup/COOP warnings
+        // User upsert will happen after reload in dashboard
+        const target = `${window.location.origin}${window.location.pathname}?reload=1&newUser=1#/dashboard`
         window.location.href = target
       }
     } catch (error) {
