@@ -8,25 +8,25 @@ export const menuItems: MenuItem[] = [
         link: '/'
     },
     {
-        sortOrder: 2,
+        sortOrder: 8,
         name: 'Tasks',
         icon: '',
         link: '/task'
     },
     {
-        sortOrder: 3,
+        sortOrder: 16,
         name:'Calendar',
         icon: '',
         link: '/calendar'
     },
     {
-        sortOrder: 4,
+        sortOrder: 24,
         name: 'Settings',
         icon: '',
         link: '/settings'   
     },
     {
-        sortOrder: 5,
+        sortOrder: 99,
         name: 'Logout',
         icon: '',
         action: 'logout'

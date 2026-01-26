@@ -11,6 +11,7 @@ export interface Attachment {
 export interface Task {
   id?: string;
   parent_id?: string;
+  owner_uid?: string;
   task_name: string;
   description?: string;
   status: TaskStatus;
