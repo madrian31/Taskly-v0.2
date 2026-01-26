@@ -21,6 +21,12 @@ export const menuItems: MenuItem[] = [
     },
     {
         sortOrder: 24,
+        name: 'Users',
+        icon: '',
+        link: '/users'
+    },
+    {
+        sortOrder: 32,
         name: 'Settings',
         icon: '',
         link: '/settings'   

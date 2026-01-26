@@ -1,1 +1,0 @@
-import{j as s}from"./vendor_react-ByBjJ8Oe.js";import"./vendor-DuPUYBON.js";function i(){return s.jsxs("div",{children:[s.jsx("h1",{children:"Users Page"}),s.jsx("p",{children:"This is the users page."})]})}export{i as default};

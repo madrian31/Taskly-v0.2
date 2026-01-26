@@ -35,6 +35,7 @@ createRoot(document.getElementById('root')).render(
           <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/task" element={<Task />} />
+            <Route path="/users" element={<Users />} />
           </Route>
           
         </Routes>
