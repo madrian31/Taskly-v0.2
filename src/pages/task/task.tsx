@@ -61,9 +61,17 @@ function TaskComponent() {
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
     const [attachments, setAttachments] = useState<Attachment[]>([]);
     const [uploading, setUploading] = useState<boolean>(false);
+    const [isMobileView, setIsMobileView] = useState<boolean>(false);
 
     useEffect(() => {
         loadTasks();
+    }, []);
+
+    useEffect(() => {
+        const onResize = () => setIsMobileView(window.innerWidth <= 490);
+        onResize();
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
     }, []);
 
     async function loadTasks() {
@@ -516,25 +524,55 @@ function TaskComponent() {
                                                 </button>
 
                                                 {openDropdownId === task.id && (
-                                                    <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
-                                                        {/* Add Subtask - only for main tasks */}
-                                                        {(task.parent_id === null || task.parent_id === undefined) && (
-                                                            <div className="dropdown-item" onClick={() => { closeDropdown(); task.id && openModal(task.id); }}>
-                                                                <Plus size={14} />
-                                                                <span>Add Subtask</span>
+                                                    isMobileView ? (
+                                                        <>
+                                                            <div className="mobile-sheet-backdrop" onClick={closeDropdown} />
+                                                            <div className="mobile-sheet" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+                                                                <div className="mobile-sheet-header">
+                                                                    <button className="mobile-sheet-close" onClick={closeDropdown} aria-label="Close">×</button>
+                                                                </div>
+                                                                <div className="mobile-sheet-content">
+                                                                    {/* Add Subtask - only for main tasks */}
+                                                                    {(task.parent_id === null || task.parent_id === undefined) && (
+                                                                        <div className="dropdown-item" onClick={() => { closeDropdown(); task.id && openModal(task.id); }}>
+                                                                            <Plus size={16} />
+                                                                            <span>Add Subtask</span>
+                                                                        </div>
+                                                                    )}
+
+                                                                    <div className="dropdown-item" onClick={() => { closeDropdown(); openEditModal(task); }}>
+                                                                        <Pencil size={16} />
+                                                                        <span>Edit Task</span>
+                                                                    </div>
+
+                                                                    <div className="dropdown-item delete" onClick={() => { closeDropdown(); task.id && deleteTask(task.id); }}>
+                                                                        <Trash size={16} />
+                                                                        <span>Delete Task</span>
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                        )}
+                                                        </>
+                                                    ) : (
+                                                        <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
+                                                            {/* Add Subtask - only for main tasks */}
+                                                            {(task.parent_id === null || task.parent_id === undefined) && (
+                                                                <div className="dropdown-item" onClick={() => { closeDropdown(); task.id && openModal(task.id); }}>
+                                                                    <Plus size={14} />
+                                                                    <span>Add Subtask</span>
+                                                                </div>
+                                                            )}
 
-                                                        <div className="dropdown-item" onClick={() => { closeDropdown(); openEditModal(task); }}>
-                                                            <Pencil size={14} />
-                                                            <span>Edit Task</span>
-                                                        </div>
+                                                            <div className="dropdown-item" onClick={() => { closeDropdown(); openEditModal(task); }}>
+                                                                <Pencil size={14} />
+                                                                <span>Edit Task</span>
+                                                            </div>
 
-                                                        <div className="dropdown-item delete" onClick={() => { closeDropdown(); task.id && deleteTask(task.id); }}>
-                                                            <Trash size={14} />
-                                                            <span>Delete Task</span>
+                                                            <div className="dropdown-item delete" onClick={() => { closeDropdown(); task.id && deleteTask(task.id); }}>
+                                                                <Trash size={14} />
+                                                                <span>Delete Task</span>
+                                                            </div>
                                                         </div>
-                                                    </div>
+                                                    )
                                                 )}
                                             </div>
                                         </div>
