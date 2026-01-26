@@ -5,7 +5,7 @@ export const menuItems: MenuItem[] = [
         sortOrder: 1,
         name: 'Dashboard',
         icon: '',
-        link: '/'
+        link: '/dashboard'
     },
     {
         sortOrder: 8,
