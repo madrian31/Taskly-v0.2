@@ -10,6 +10,7 @@ export interface ITaskRepository {
 
   createTask(task: Task): Promise<void>;
   updateStatus(id: string, status: TaskStatus): Promise<void>;
+  updateTask(id: string, data: Partial<Task>): Promise<void>;
 
   deleteTask(id: string): Promise<void>;
 }
