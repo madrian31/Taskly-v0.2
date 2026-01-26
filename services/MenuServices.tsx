@@ -3,7 +3,7 @@ import {MenuItem} from './interfaces/IMenuServices';
 export const menuItems: MenuItem[] = [
     {
         sortOrder: 1,
-        name: 'Home',
+        name: 'Dashboard',
         icon: '',
         link: '/'
     },

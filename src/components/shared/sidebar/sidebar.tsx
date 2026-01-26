@@ -82,7 +82,7 @@ export default function Sidebar({children}: SidebarProps) {
                     </div>
                     <div className="user-info">
                         <h5 id="userName">{userName ?? 'Loading...'}</h5>
-                        <p id="userEmail">{userEmail ?? 'Please wait...'}</p>
+                        {/* <p id="userEmail">{userEmail ?? 'Please wait...'}</p> */}
                     </div>
                 </div>
 

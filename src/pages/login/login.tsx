@@ -25,7 +25,7 @@ export default function Login() {
     try {
       const result = await AuthService.signInWithGoogle()
       if (result && result.user) {
-        const target = `${window.location.origin}${window.location.pathname}?reload=1#/home`
+        const target = `${window.location.origin}${window.location.pathname}?reload=1#/dashboard`
         window.location.href = target
       }
     } catch (error) {
