@@ -5,6 +5,7 @@ import { menuItems } from "../../../../services/MenuServices";
 import { ReactNode } from "react";
 import AuthService from "../../../../services/authService";
 import { getAvatarUrl } from "../../../services/avatar";
+import UsersRepository from "../../../../repository/UsersRepository";
 
 interface SidebarProps {
     children?: ReactNode;
@@ -18,11 +19,35 @@ export default function Sidebar({children}: SidebarProps) {
     const [userPhoto, setUserPhoto] = useState<string | null>(null);
 
     useEffect(() => {
-        const unsubscribe = AuthService.onAuthStateChanged((user) => {
+        const unsubscribe = AuthService.onAuthStateChanged(async (user) => {
             if (user) {
                 setUserName(user.displayName || user.email || 'User');
                 setUserEmail(user.email || '');
-                setUserPhoto(user.photoURL || null);
+                
+                // Fetch user document from Firestore to get saved photoURL
+                try {
+                    const userDoc = await UsersRepository.getById(user.uid);
+                    console.log('Sidebar auth user:', user)
+                    console.log('Sidebar providerData:', user.providerData)
+                    console.log('Sidebar userDoc from Firestore:', userDoc)
+
+                    if (userDoc && userDoc.photoURL) {
+                        setUserPhoto(userDoc.photoURL);
+                    } else {
+                        // Fallback to auth photoURL or providerData
+                        const providerPhoto = user.providerData && user.providerData.length > 0
+                            ? (user.providerData[0] as any).photoURL
+                            : undefined;
+                        setUserPhoto(user.photoURL ?? providerPhoto ?? null);
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch user document:', error);
+                    // Fallback to auth photoURL
+                    const providerPhoto = user.providerData && user.providerData.length > 0
+                        ? (user.providerData[0] as any).photoURL
+                        : undefined;
+                    setUserPhoto(user.photoURL ?? providerPhoto ?? null);
+                }
             } else {
                 setUserName(null);
                 setUserEmail(null);

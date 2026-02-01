@@ -16,10 +16,16 @@ export default function Dashboard() {
             
             // Upsert user after reload (popup warnings are now cleared)
             const authUser = auth.currentUser
+
+            const providerPhoto = authUser.providerData && authUser.providerData.length > 0
+                ? (authUser.providerData[0] as any).photoURL
+                : undefined
+            const photo = authUser.photoURL ?? providerPhoto ?? undefined
+
             UsersRepository.upsertByUid(authUser.uid, {
                 displayName: authUser.displayName ?? undefined,
                 email: authUser.email ?? undefined,
-                photoURL: authUser.photoURL ?? undefined,
+                photoURL: photo,
             })
             .then(() => console.log('Upserted user after reload', authUser.uid))
             .catch(e => console.error('Failed to upsert user doc', e))

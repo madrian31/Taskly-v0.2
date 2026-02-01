@@ -26,8 +26,27 @@ export default function Login() {
     try {
       const result = await AuthService.signInWithGoogle()
       if (result && result.user) {
+        // Determine photo URL: prefer User.photoURL, fall back to providerData
+        const providerPhoto = result.user.providerData && result.user.providerData.length > 0
+          ? (result.user.providerData[0] as any).photoURL
+          : undefined
+        const photo = result.user.photoURL ?? providerPhoto ?? undefined
+
+        // Upsert user record in Firestore using auth UID as doc id
+        try {
+          console.log('Upserting user', { uid: result.user.uid, photo, displayName: result.user.displayName })
+          await UsersRepository.upsertByUid(result.user.uid, {
+            displayName: result.user.displayName ?? undefined,
+            email: result.user.email ?? undefined,
+            photoURL: photo,
+            role: 'user',
+          })
+        } catch (upsertError) {
+          console.error('Failed to upsert user:', upsertError)
+        }
+
         // Immediately redirect to clear popup/COOP warnings
-        // User upsert will happen after reload in dashboard
+        // and allow dashboard to reload/upsert any additional data
         const target = `${window.location.origin}${window.location.pathname}?reload=1&newUser=1#/dashboard`
         window.location.href = target
       }

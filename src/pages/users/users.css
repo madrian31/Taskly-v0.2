@@ -454,7 +454,7 @@
 
 .modal-body {
   padding: 24px;
-  overflow-y: auto;
+  /* overflow-y: auto; */
 }
 
 .modal-footer {

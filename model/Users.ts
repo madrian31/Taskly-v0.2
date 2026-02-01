@@ -4,9 +4,8 @@ export interface User {
   displayName?: string;
   email?: string;
   photoURL?: string;
-  role?: 'user' | 'admin';
-  createdAt?: number; // unix ms
-  // add other fields as needed
+  role?: 'user' |'member' |'admin';
+  createdAt?: number; 
 }
 
 export function userFromFirebase(docId: string, data: any): User {
