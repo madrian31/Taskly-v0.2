@@ -5,16 +5,9 @@ import { User } from '../../../model/users'
 import { auth } from '../../firebase/firebase'
 import { signInAnonymously, onAuthStateChanged } from 'firebase/auth'
 
-// Extended User interface for management features
-interface ExtendedUser extends User {
-  department?: string
-  status?: 'active' | 'inactive' | 'pending'
-  lastActive?: string
-}
-
 export default function Users() {
-  const [users, setUsers] = useState<ExtendedUser[]>([])
-  const [filteredUsers, setFilteredUsers] = useState<ExtendedUser[]>([])
+  const [users, setUsers] = useState<User[]>([])
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
@@ -23,7 +16,7 @@ export default function Users() {
   const [statusFilter, setStatusFilter] = useState('all')
   
   const [showEditModal, setShowEditModal] = useState(false)
-  const [editingUser, setEditingUser] = useState<ExtendedUser | null>(null)
+  const [editingUser, setEditingUser] = useState<User | null>(null)
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   useEffect(() => {
@@ -35,16 +28,9 @@ export default function Users() {
       UsersRepository.getAll()
         .then((res: any) => {
           console.log('Users fetched', res)
-          // Treat fetched data as any and extend into ExtendedUser fields
-          const extendedUsers: ExtendedUser[] = (res as any[]).map((u: any) => ({
-            ...u,
-            department: u.department ?? 'Engineering',
-            status: u.status ?? 'active',
-            lastActive: u.lastActive ?? new Date().toLocaleDateString()
-          }))
           if (mounted) {
-            setUsers(extendedUsers)
-            setFilteredUsers(extendedUsers)
+            setUsers(res)
+            setFilteredUsers(res)
           }
         })
         .catch(err => {
@@ -103,17 +89,47 @@ export default function Users() {
     showNotification('Add user functionality coming soon', 'success')
   }
 
-  const handleEdit = (user: ExtendedUser) => {
+  const handleEdit = (user: User) => {
     setEditingUser({ ...user })
     setShowEditModal(true)
   }
 
-  const handleSaveEdit = () => {
-    if (editingUser) {
+  const handleSaveEdit = async () => {
+    if (!editingUser) return
+    
+    try {
+      // Persist changes to Firestore
+      const payload: any = {}
+      if (editingUser.displayName !== undefined) payload.displayName = editingUser.displayName
+      if (editingUser.email !== undefined) payload.email = editingUser.email
+      if (editingUser.role !== undefined) payload.role = editingUser.role
+      if (editingUser.department !== undefined) payload.department = editingUser.department
+      if (editingUser.status !== undefined) payload.status = editingUser.status
+      // only add lastActive when it's non-null/defined
+      if (editingUser.lastActive != null) payload.lastActive = editingUser.lastActive
+
+      console.log('🔄 Updating user in Firestore...')
+      console.log('User ID:', editingUser.id)
+      console.log('Payload:', JSON.stringify(payload, null, 2))
+
+      await UsersRepository.update(editingUser.id, payload as any)
+      console.log('✅ Update successful!')
+
+      // Verify stored doc
+      const stored = await UsersRepository.getById(editingUser.id)
+      console.log('📦 Stored user after update:', JSON.stringify(stored, null, 2))
+
+      // Update local state
       setUsers(users.map(u => u.id === editingUser.id ? editingUser : u))
       showNotification('User updated successfully', 'success')
       setShowEditModal(false)
       setEditingUser(null)
+    } catch (err: any) {
+      console.error('❌ Failed to update user in Firestore')
+      console.error('Error:', err)
+      console.error('Error message:', err?.message)
+      console.error('Error code:', err?.code)
+      showNotification(`Failed to update user: ${err?.message || 'Unknown error'}`, 'error')
     }
   }
 
