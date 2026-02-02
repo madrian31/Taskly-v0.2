@@ -17,6 +17,8 @@ export default function Users() {
   
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
+  const [currentUid, setCurrentUid] = useState<string | null>(null)
+  const [currentUserDoc, setCurrentUserDoc] = useState<User | null>(null)
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   useEffect(() => {
@@ -40,13 +42,23 @@ export default function Users() {
         .finally(() => { if (mounted) setLoading(false) })
     }
 
-    const unsub = onAuthStateChanged(auth, user => {
+    const unsub = onAuthStateChanged(auth, async user => {
       console.log('onAuthStateChanged', user)
       if (!user) {
         signInAnonymously(auth)
           .then(() => console.log('Anonymous sign-in successful'))
           .catch(e => console.error('Anonymous sign-in failed', e))
       } else {
+        // track current signed-in UID and fetch their user doc (for role/permissions)
+        setCurrentUid(user.uid)
+        try {
+          const me = await UsersRepository.getById(user.uid)
+          setCurrentUserDoc(me as any)
+        } catch (e) {
+          console.warn('Failed to fetch current user doc', e)
+          setCurrentUserDoc(null)
+        }
+
         fetchUsers()
       }
     })
@@ -96,6 +108,16 @@ export default function Users() {
 
   const handleSaveEdit = async () => {
     if (!editingUser) return
+    // Permission check: only allow editing own document or allow if current user is admin
+    if (!currentUid) {
+      showNotification('Not signed in — cannot save changes', 'error')
+      return
+    }
+    if (currentUid !== editingUser.id && currentUserDoc?.role !== 'admin') {
+      console.warn('Permission denied: current user', currentUid, 'cannot edit', editingUser.id)
+      showNotification('You do not have permission to edit this user', 'error')
+      return
+    }
     
     try {
       // Persist changes to Firestore
@@ -293,7 +315,11 @@ export default function Users() {
                       <div className="action-buttons">
                         <button 
                           className="action-btn action-btn-edit"
-                          onClick={() => handleEdit(user)}
+                          onClick={() => {
+                            if (!currentUid) { showNotification('Not signed in', 'error'); return }
+                            if (currentUid !== user.id && currentUserDoc?.role !== 'admin') { showNotification('You do not have permission to edit this user', 'error'); return }
+                            handleEdit(user)
+                          }}
                           title="Edit user"
                         >
                           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
