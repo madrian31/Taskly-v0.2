@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import './task.css';
 import './modal.css';
 import '../../App.css';
@@ -62,6 +62,23 @@ function TaskComponent() {
     const [attachments, setAttachments] = useState<Attachment[]>([]);
     const [uploading, setUploading] = useState<boolean>(false);
     const [isMobileView, setIsMobileView] = useState<boolean>(false);
+
+    // Compute counts for filter tabs (MAIN TASKS only — excludes subtasks)
+    const mainCounts = useMemo(() => {
+        const mainTasks: Task[] = [...tasks];
+
+        const getCount = (status?: string) => {
+            if (!status || status === 'all') return mainTasks.length;
+            return mainTasks.filter(t => t.status === status).length;
+        };
+
+        return {
+            all: getCount('all'),
+            todo: getCount('todo'),
+            in_progress: getCount('in_progress'),
+            done: getCount('done')
+        } as Record<string, number>;
+    }, [tasks]);
 
     useEffect(() => {
         loadTasks();
@@ -432,7 +449,7 @@ function TaskComponent() {
                             className={`filter-tab ${activeFilter === filter.key ? 'active' : ''}`}
                             onClick={() => setActiveFilter(filter.key)}
                         >
-                            {filter.label}
+                            {filter.label} {"(" + (mainCounts[filter.key] ?? 0) + ")"}
                         </button>
                     ))}
                 </div>
@@ -487,7 +504,14 @@ function TaskComponent() {
                                         {/* Task Content */}
                                         <div className="task-content">
                                             <div className="task-title-row">
-                                                <h3 className="task-title">{task.task_name}</h3>
+                                                <h3 className="task-title">
+                                                    {task.task_name}
+                                                    {task.id && (taskSubtasks.length > 0) && (
+                                                        <span className="subtask-pill" aria-label={`${taskSubtasks.length} subtasks`}>
+                                                            {taskSubtasks.length}
+                                                        </span>
+                                                    )}
+                                                </h3>
                                             </div>
                                             {task.description && (
                                                 <p className="task-description">{task.description}</p>

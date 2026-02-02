@@ -328,6 +328,20 @@
     line-height: 1.4;
 }
 
+/* Small pill showing number of subtasks for a task */
+.subtask-pill {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate-500);
+    background: var(--slate-100);
+    border: 1px solid var(--slate-200);
+    border-radius: 999px;
+    vertical-align: middle;
+}
+
 .subtask-title {
     font-size: 15px;
     font-weight: 500;
