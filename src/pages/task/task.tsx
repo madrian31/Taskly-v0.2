@@ -63,22 +63,21 @@ function TaskComponent() {
     const [uploading, setUploading] = useState<boolean>(false);
     const [isMobileView, setIsMobileView] = useState<boolean>(false);
 
-    // Compute counts for filter tabs (MAIN TASKS only — excludes subtasks)
+    // Compute counts: count parents that have at least one subtask matching each status
     const mainCounts = useMemo(() => {
-        const mainTasks: Task[] = [...tasks];
+        const counts = { all: tasks.length, todo: 0, in_progress: 0, done: 0 } as Record<string, number>;
 
-        const getCount = (status?: string) => {
-            if (!status || status === 'all') return mainTasks.length;
-            return mainTasks.filter(t => t.status === status).length;
-        };
+        for (const t of tasks) {
+            const subs = t.id ? (subtasks[t.id] || []) : [];
+            
+            // Count parent in each filter if it has at least one subtask of that status
+            if (subs.some(s => s.status === 'todo')) counts.todo += 1;
+            if (subs.some(s => s.status === 'in_progress')) counts.in_progress += 1;
+            if (subs.some(s => s.status === 'done')) counts.done += 1;
+        }
 
-        return {
-            all: getCount('all'),
-            todo: getCount('todo'),
-            in_progress: getCount('in_progress'),
-            done: getCount('done')
-        } as Record<string, number>;
-    }, [tasks]);
+        return counts;
+    }, [tasks, subtasks]);
 
     useEffect(() => {
         loadTasks();
@@ -289,14 +288,20 @@ function TaskComponent() {
     function getFilteredTasks() {
         let filtered = tasks;
 
-        // Apply status filter
+        // Apply status filter: show parents with at least one subtask matching the filter
         if (activeFilter !== 'all') {
             filtered = filtered.filter(task => {
+                const subs = task.id ? (subtasks[task.id] || []) : [];
+
                 switch (activeFilter) {
-                    case 'todo': return task.status === 'todo';
-                    case 'in_progress': return task.status === 'in_progress';
-                    case 'done': return task.status === 'done';
-                    default: return true;
+                    case 'todo':
+                        return subs.some(s => s.status === 'todo');
+                    case 'in_progress':
+                        return subs.some(s => s.status === 'in_progress');
+                    case 'done':
+                        return subs.some(s => s.status === 'done');
+                    default:
+                        return true;
                 }
             });
         }
@@ -476,7 +481,12 @@ function TaskComponent() {
                     <div className="tasks-list">
                         {getFilteredTasks().map(task => {
                             const taskSubtasks = task.id ? subtasks[task.id] || [] : [];
-                            const hasSubtasks = taskSubtasks.length > 0;
+                            // Filter displayed subtasks based on active filter
+                            const displayedSubtasks = activeFilter === 'all'
+                                ? taskSubtasks
+                                : taskSubtasks.filter(s => s.status === activeFilter);
+                            const subtaskDoneCount = taskSubtasks.filter(s => s.status === 'done').length;
+                            const hasSubtasks = displayedSubtasks.length > 0;
                             const isExpanded = task.id ? expandedTasks.has(task.id) : false;
                             const statusInfo = getStatusIcon(task.status);
                             const priorityInfo = getPriorityInfo(task.priority);
@@ -507,8 +517,8 @@ function TaskComponent() {
                                                 <h3 className="task-title">
                                                     {task.task_name}
                                                     {task.id && (taskSubtasks.length > 0) && (
-                                                        <span className="subtask-pill" aria-label={`${taskSubtasks.length} subtasks`}>
-                                                            {taskSubtasks.length}
+                                                        <span className="subtask-pill" aria-label={`${subtaskDoneCount} of ${taskSubtasks.length} subtasks completed`}>
+                                                            {subtaskDoneCount}/{taskSubtasks.length}
                                                         </span>
                                                     )}
                                                 </h3>
@@ -608,7 +618,7 @@ function TaskComponent() {
                                             {/* Vertical connector line */}
                                             <div className="connector-line" />
                                             
-                                            {taskSubtasks.map((subtask, index) => {
+                                            {displayedSubtasks.map((subtask, index) => {
                                                 const subtaskStatusInfo = getStatusIcon(subtask.status);
                                                 const subtaskPriorityInfo = getPriorityInfo(subtask.priority);
                                                 const SubtaskStatusIcon = subtaskStatusInfo.icon;
