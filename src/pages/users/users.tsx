@@ -120,15 +120,12 @@ export default function Users() {
     }
     
     try {
-      // Persist changes to Firestore
       const payload: any = {}
       if (editingUser.displayName !== undefined) payload.displayName = editingUser.displayName
       if (editingUser.email !== undefined) payload.email = editingUser.email
       if (editingUser.role !== undefined) payload.role = editingUser.role
       if (editingUser.department !== undefined) payload.department = editingUser.department
       if (editingUser.status !== undefined) payload.status = editingUser.status
-      // only add lastActive when it's non-null/defined
-      if (editingUser.lastActive != null) payload.lastActive = editingUser.lastActive
 
       console.log('🔄 Updating user in Firestore...')
       console.log('User ID:', editingUser.id)
@@ -153,6 +150,7 @@ export default function Users() {
       console.error('Error code:', err?.code)
       showNotification(`Failed to update user: ${err?.message || 'Unknown error'}`, 'error')
     }
+
   }
 
   const handleToggleStatus = (userId: string) => {
@@ -326,25 +324,7 @@ export default function Users() {
                             <path d="M11.333 2A1.886 1.886 0 0 1 14 4.667l-9 9-3.667 1 1-3.667 9-9z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                         </button>
-                        <button 
-                          className="action-btn action-btn-toggle"
-                          onClick={() => handleToggleStatus(user.id)}
-                          title={user.status === 'active' ? 'Deactivate' : 'Activate'}
-                        >
-                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path d="M14 8A6 6 0 1 1 2 8a6 6 0 0 1 12 0z" stroke="currentColor" strokeWidth="1.5"/>
-                            <path d="M8 8V4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                          </svg>
-                        </button>
-                        <button 
-                          className="action-btn action-btn-delete"
-                          onClick={() => handleDelete(user.id, user.displayName || user.email || 'this user')}
-                          title="Delete user"
-                        >
-                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path d="M2 4h12M5.333 4V2.667a1.333 1.333 0 0 1 1.334-1.334h2.666a1.333 1.333 0 0 1 1.334 1.334V4m2 0v9.333a1.333 1.333 0 0 1-1.334 1.334H4.667a1.333 1.333 0 0 1-1.334-1.334V4h9.334z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </button>
+                        
                       </div>
                     </td>
                   </tr>
