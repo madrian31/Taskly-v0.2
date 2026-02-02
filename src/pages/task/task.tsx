@@ -548,7 +548,7 @@ function TaskComponent() {
 
                                         {/* Actions */}
                                         <div className="task-actions-dropdown">
-                                            <div style={{ position: 'relative' }}>
+                                            <div className="relative-position">
                                                 <button
                                                     className="more-actions-button"
                                                     onClick={(e) => { e.stopPropagation(); task.id && toggleDropdown(task.id); }}
@@ -657,7 +657,7 @@ function TaskComponent() {
                                                             </div>
 
                                                             <div className="task-actions-dropdown">
-                                                                <div style={{ position: 'relative' }}>
+                                                                <div className="relative-position">
                                                                     <button
                                                                         className="more-actions-button"
                                                                         onClick={(e) => { e.stopPropagation(); subtask.id && toggleDropdown(subtask.id); }}
@@ -717,7 +717,7 @@ function TaskComponent() {
                                 <div className="task-form-group">
                                     <label className="task-form-label">
                                         {isSubtaskMode ? 'Subtask Name' : 'Task Name'}
-                                        <span style={{color: '#dc2626'}}>*</span>
+                                        <span className="required-star">*</span>
                                     </label>
                                     <input
                                         type="text"
@@ -730,9 +730,8 @@ function TaskComponent() {
                                         required
                                     />
                                     <div 
-                                        className="task-error-message" 
-                                        id="taskNameError" 
-                                        style={{ display: showValidationErrors && !form.task_name ? 'block' : 'none' }}
+                                        className={`task-error-message ${showValidationErrors && !form.task_name ? 'task-error-visible' : ''}`} 
+                                        id="taskNameError"
                                     >
                                         {isSubtaskMode ? 'Subtask name is required' : 'Task name is required'}
                                     </div>
@@ -800,74 +799,44 @@ function TaskComponent() {
 
                                 <div className="task-form-group">
                                     <label className="task-form-label">Attachments</label>
-                                    <div style={{
-                                        border: '2px dashed #cbd5e1',
-                                        borderRadius: '8px',
-                                        padding: '16px',
-                                        textAlign: 'center',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.3s ease',
-                                        backgroundColor: '#f8fafc'
-                                    }}>
+                                    <div className={`file-upload-box ${uploading ? 'uploading' : ''}`}>
                                         <input
                                             type="file"
                                             multiple
                                             onChange={handleFileSelect}
-                                            style={{ display: 'none' }}
+                                            className="file-input-hidden"
                                             id="fileInput"
                                             accept="image/*,.pdf,.doc,.docx,.txt"
                                             disabled={uploading}
                                         />
-                                        <label htmlFor="fileInput" style={{ cursor: uploading ? 'not-allowed' : 'pointer', display: 'block', opacity: uploading ? 0.6 : 1 }}>
-                                            <FileUp size={24} style={{ margin: '0 auto 8px', color: '#7c3aed' }} />
-                                            <p style={{ margin: '8px 0 4px', color: '#334155', fontWeight: '500' }}>
-                                                Click to upload or drag files
-                                            </p>
-                                            <p style={{ margin: '0', color: '#94a3b8', fontSize: '0.875rem' }}>
-                                                Images, PDF, DOC, TXT (Max 10MB each)
-                                            </p>
+                                        <label htmlFor="fileInput" className={`file-upload-label ${uploading ? 'uploading' : ''}`}>
+                                            <FileUp size={24} className="fileup-icon" />
+                                            <p className="file-upload-title">Click to upload or drag files</p>
+                                            <p className="file-upload-note">Images, PDF, DOC, TXT (Max 10MB each)</p>
                                         </label>
                                     </div>
 
                                     {/* Existing Attachments */}
                                     {attachments.length > 0 && (
-                                        <div style={{ marginTop: '16px' }}>
-                                            <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '8px', fontWeight: '500' }}>
-                                                Current Attachments: {attachments.length}
-                                            </p>
+                                        <div className="attachments-section">
+                                            <p className="attachments-heading">Current Attachments: {attachments.length}</p>
                                             
                                             {/* Image Previews */}
                                             {attachments.some(att => isImageAttachment(att)) && (
-                                                <div style={{ marginBottom: '12px' }}>
-                                                    <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '8px' }}>Images:</p>
-                                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '8px' }}>
+                                                <div className="images-grid">
+                                                    <p className="images-heading-small">Images:</p>
+                                                    <div className="images-grid-grid">
                                                         {attachments.filter(att => isImageAttachment(att)).map((attachment) => (
-                                                            <div key={attachment.id} style={{ position: 'relative', borderRadius: '6px', overflow: 'hidden', border: '1px solid #e2e8f0', backgroundColor: '#f1f5f9' }}>
+                                                            <div key={attachment.id} className="attachment-item">
                                                                 <img 
                                                                     src={attachment.fileUrl} 
                                                                     alt={attachment.fileName}
-                                                                    style={{ width: '100%', height: '80px', objectFit: 'cover' }}
+                                                                    className="attachment-img"
                                                                 />
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => removeAttachment(attachment.id)}
-                                                                    style={{
-                                                                        position: 'absolute',
-                                                                        top: '2px',
-                                                                        right: '2px',
-                                                                        background: 'rgba(239, 68, 68, 0.9)',
-                                                                        border: 'none',
-                                                                        color: 'white',
-                                                                        borderRadius: '50%',
-                                                                        width: '20px',
-                                                                        height: '20px',
-                                                                        cursor: 'pointer',
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        justifyContent: 'center',
-                                                                        padding: '0',
-                                                                        fontSize: '12px'
-                                                                    }}
+                                                                    className="attachment-remove-btn"
                                                                     title={`Remove ${attachment.fileName}`}
                                                                 >
                                                                     ×
@@ -881,45 +850,19 @@ function TaskComponent() {
                                             {/* Other Files */}
                                             {attachments.some(att => !isImageAttachment(att)) && (
                                                 <div>
-                                                    <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '8px' }}>Files:</p>
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                    <p className="attachment-files-heading">Files:</p>
+                                                    <div className="attachment-files-list">
                                                         {attachments.filter(att => !isImageAttachment(att)).map((attachment) => (
-                                                            <div key={attachment.id} style={{
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'space-between',
-                                                                padding: '8px 12px',
-                                                                backgroundColor: '#f1f5f9',
-                                                                borderRadius: '6px',
-                                                                border: '1px solid #e2e8f0'
-                                                            }}>
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '0' }}>
-                                                                    <File size={18} style={{ color: '#7c3aed', flexShrink: 0 }} />
-                                                                    <span style={{
-                                                                        fontSize: '0.875rem',
-                                                                        color: '#334155',
-                                                                        whiteSpace: 'nowrap',
-                                                                        overflow: 'hidden',
-                                                                        textOverflow: 'ellipsis'
-                                                                    }}>
-                                                                        {attachment.fileName}
-                                                                    </span>
-                                                                </div>
-                                                                <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                                                            <div key={attachment.id} className="attachment-file-row">
+                                                                <div className="attachment-file-meta">
+                                                                        <File size={18} className="file-icon-purple" />
+                                                                        <span className="attachment-file-name">{attachment.fileName}</span>
+                                                                    </div>
+                                                                <div className="flex-gap-4">
                                                                     <a 
                                                                         href={attachment.fileUrl} 
                                                                         target="_blank" 
                                                                         rel="noopener noreferrer"
-                                                                        style={{
-                                                                            background: 'none',
-                                                                            border: 'none',
-                                                                            cursor: 'pointer',
-                                                                            padding: '4px',
-                                                                            color: '#3b82f6',
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            flexShrink: 0
-                                                                        }}
                                                                         title="Download file"
                                                                     >
                                                                         <Download size={16} />
@@ -927,17 +870,8 @@ function TaskComponent() {
                                                                     <button
                                                                         type="button"
                                                                         onClick={() => removeAttachment(attachment.id)}
-                                                                        style={{
-                                                                            background: 'none',
-                                                                            border: 'none',
-                                                                            cursor: 'pointer',
-                                                                            padding: '4px',
-                                                                            color: '#ef4444',
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            flexShrink: 0
-                                                                        }}
                                                                         title="Remove file"
+                                                                        className="icon-button-danger"
                                                                     >
                                                                         <Trash2 size={16} />
                                                                     </button>
@@ -952,44 +886,26 @@ function TaskComponent() {
 
                                     {/* New Files to Upload */}
                                     {uploadedFiles.length > 0 && (
-                                        <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e2e8f0' }}>
-                                            <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '8px', fontWeight: '500' }}>
-                                                New Files to Upload: {uploadedFiles.length}
-                                            </p>
-                                            
+                                        <div className="new-files-section">
+                                            <p className="new-files-heading">New Files to Upload: {uploadedFiles.length}</p>
+
                                             {/* Image Previews */}
                                             {uploadedFiles.some(f => fileUploadService.isImageFile(f)) && (
-                                                <div style={{ marginBottom: '12px' }}>
-                                                    <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '8px' }}>Images:</p>
-                                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '8px' }}>
+                                                <div className="images-grid-wrapper">
+                                                    <p className="attachment-files-heading">Images:</p>
+                                                    <div className="images-grid-grid">
                                                         {uploadedFiles.filter(f => fileUploadService.isImageFile(f)).map((file, index) => (
-                                                            <div key={index} style={{ position: 'relative', borderRadius: '6px', overflow: 'hidden', border: '1px solid #d1fae5', backgroundColor: '#f0fdf4' }}>
+                                                            <div key={index} className="attachment-item">
                                                                 <img 
                                                                     src={URL.createObjectURL(file)} 
                                                                     alt={file.name}
-                                                                    style={{ width: '100%', height: '80px', objectFit: 'cover' }}
+                                                                    className="attachment-img"
                                                                     title={file.name}
                                                                 />
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => removeFile(uploadedFiles.indexOf(file))}
-                                                                    style={{
-                                                                        position: 'absolute',
-                                                                        top: '2px',
-                                                                        right: '2px',
-                                                                        background: 'rgba(239, 68, 68, 0.9)',
-                                                                        border: 'none',
-                                                                        color: 'white',
-                                                                        borderRadius: '50%',
-                                                                        width: '20px',
-                                                                        height: '20px',
-                                                                        cursor: 'pointer',
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        justifyContent: 'center',
-                                                                        padding: '0',
-                                                                        fontSize: '12px'
-                                                                    }}
+                                                                    className="attachment-remove-btn"
                                                                     title={`Remove ${file.name}`}
                                                                 >
                                                                     ×
@@ -1003,50 +919,31 @@ function TaskComponent() {
                                             {/* Other Files */}
                                             {uploadedFiles.some(f => !fileUploadService.isImageFile(f)) && (
                                                 <div>
-                                                    <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '8px' }}>Files:</p>
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                    <p className="attachment-files-heading">Files:</p>
+                                                    <div className="attachment-files-list">
                                                         {uploadedFiles.filter(f => !fileUploadService.isImageFile(f)).map((file, index) => (
-                                                            <div key={index} style={{
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'space-between',
-                                                                padding: '8px 12px',
-                                                                backgroundColor: '#ecfdf5',
-                                                                borderRadius: '6px',
-                                                                border: '1px solid #d1fae5'
-                                                            }}>
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '0' }}>
-                                                                    <File size={18} style={{ color: '#10b981', flexShrink: 0 }} />
-                                                                    <span style={{
-                                                                        fontSize: '0.875rem',
-                                                                        color: '#334155',
-                                                                        whiteSpace: 'nowrap',
-                                                                        overflow: 'hidden',
-                                                                        textOverflow: 'ellipsis'
-                                                                    }}>
-                                                                        {file.name}
-                                                                    </span>
-                                                                    <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-                                                                        ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                                                                    </span>
+                                                            <div key={index} className="attachment-file-row">
+                                                                <div className="attachment-file-meta">
+                                                                    <File size={18} className="file-icon-purple" />
+                                                                    <span className="attachment-file-name">{file.name}</span>
                                                                 </div>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => removeFile(uploadedFiles.indexOf(file))}
-                                                                    style={{
-                                                                        background: 'none',
-                                                                        border: 'none',
-                                                                        cursor: 'pointer',
-                                                                        padding: '4px',
-                                                                        color: '#ef4444',
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        flexShrink: 0
-                                                                    }}
-                                                                    title="Remove file"
-                                                                >
-                                                                    <Trash2 size={16} />
-                                                                </button>
+                                                                <div className="flex-gap-4">
+                                                                    <a
+                                                                        href={URL.createObjectURL(file)}
+                                                                        download={file.name}
+                                                                        title="Download file"
+                                                                    >
+                                                                        <Download size={16} />
+                                                                    </a>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => removeFile(index)}
+                                                                        title="Remove file"
+                                                                        className="icon-button-danger"
+                                                                    >
+                                                                        <Trash2 size={16} />
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         ))}
                                                     </div>
@@ -1067,7 +964,6 @@ function TaskComponent() {
                                 className="task-btn task-btn-primary" 
                                 onClick={submitNewTask}
                                 disabled={uploading}
-                                style={{ opacity: uploading ? 0.6 : 1, cursor: uploading ? 'not-allowed' : 'pointer' }}
                             >
                                 {uploading ? 'Uploading...' : (editingTaskId ? (isSubtaskMode ? 'Save Subtask' : 'Save Task') : (isSubtaskMode ? 'Add Subtask' : 'Add Task'))}
                             </button>
@@ -1080,11 +976,10 @@ function TaskComponent() {
             {showSuccessModal && (
                 <div className="task-modal-overlay" onClick={closeSuccessModal}>
                     <div 
-                        className="task-modal" 
+                        className="task-modal task-modal--small" 
                         onClick={e => e.stopPropagation()}
-                        style={{maxWidth: '400px', textAlign: 'center'}}
                     >
-                        <div className="task-modal-header" style={{borderBottom: 'none', justifyContent: 'flex-end', padding: '12px 16px'}}>
+                        <div className="task-modal-header task-modal-header--compact">
                             <button
                                 className="task-modal-close-btn"
                                 type="button"
@@ -1095,49 +990,21 @@ function TaskComponent() {
                             </button>
                         </div>
 
-                        <div className="task-modal-body" style={{padding: '20px 32px 32px'}}>
-                            <div style={{
-                                width: '80px',
-                                height: '80px',
-                                margin: '0 auto 24px',
-                                borderRadius: '50%',
-                                background: 'linear-gradient(135deg, rgba(124,58,237,0.1), rgba(124,58,237,0.05))',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                border: '3px solid #7c3aed'
-                            }}>
+                        <div className="task-modal-body task-modal-body--success">
+                            <div className="success-icon-circle">
                                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                                     <polyline points="20 6 9 17 4 12"></polyline>
                                 </svg>
                             </div>
 
-                            <h2 style={{
-                                fontSize: '1.5rem',
-                                color: '#0f172a',
-                                marginBottom: '12px',
-                                fontWeight: '600'
-                            }}>
-                                Awesome!
-                            </h2>
+                            <h2 className="success-title">Awesome!</h2>
                             
-                            <p style={{
-                                color: '#64748b',
-                                fontSize: '0.95rem',
-                                marginBottom: '28px'
-                            }}>
-                                {isSubtaskMode ? 'Subtask' : 'Task'} successfully added to your list
-                            </p>
+                            <p className="success-message">{isSubtaskMode ? 'Subtask' : 'Task'} successfully added to your list</p>
 
                             <button 
                                 type="button" 
-                                className="task-btn task-btn-primary"
+                                className="task-btn task-btn-primary task-btn-full"
                                 onClick={closeSuccessModal}
-                                style={{
-                                    width: '100%',
-                                    padding: '12px',
-                                    fontSize: '1rem'
-                                }}
                             >
                                 Continue
                             </button>

@@ -328,7 +328,103 @@
     line-height: 1.4;
 }
 
+/* Required star */
+.required-star { color: #dc2626; }
+
+/* Validation visible state - modal.css already has .task-error-message default hidden */
+.task-error-visible { display: block; }
+
+/* File upload area moved from inline styles */
+.file-upload-box {
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #f8fafc;
+}
+.file-upload-box.uploading { cursor: not-allowed; opacity: 0.6; }
+
+.file-upload-label { display: block; }
+.fileup-icon { margin: 0 auto 8px; color: #7c3aed; display:block; }
+.file-upload-title { margin: 8px 0 4px; color: #334155; font-weight: 500; }
+.file-upload-note { margin: 0; color: #94a3b8; font-size: 0.875rem; }
+
+.attachments-section { margin-top: 16px; }
+.attachments-heading { font-size: 0.875rem; color: #475569; margin-bottom: 8px; font-weight: 500; }
+.images-grid { margin-bottom: 12px; }
+.images-grid-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
+.attachment-item {
+    position: relative;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    background-color: #f1f5f9;
+}
+.attachment-img { width: 100%; height: 80px; object-fit: cover; display: block; }
+.attachment-remove-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: rgba(239, 68, 68, 0.9);
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 12px;
+}
+
+.attachment-files-list { display: flex; flex-direction: column; gap: 8px; }
+.attachment-file-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background-color: #f1f5f9;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+.attachment-file-meta { display:flex; align-items:center; gap:8px; min-width:0; }
+.attachment-file-name { font-size: 0.875rem; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.attachment-file-size { font-size: 0.75rem; color: #6b7280; }
+
+.new-files-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; }
+
+
 /* Small pill showing number of subtasks for a task */
+
+/* Helpers for moved inline styles */
+.file-input-hidden { display: none; }
+
+/* Reuse attachments heading for 'New Files to Upload' */
+.new-files-heading { font-size: 0.875rem; color: #475569; margin-bottom: 8px; font-weight: 500; }
+
+/* images grid wrapper and inner grid (used for previews) */
+.images-grid-wrapper { margin-bottom: 12px; }
+.images-grid-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
+
+/* Small heading for file lists */
+.attachment-files-heading { font-size: 0.75rem; color: #64748b; margin-bottom: 8px; }
+
+/* Make primary task button full width variant */
+.task-btn-full { width: 100%; padding: 12px; font-size: 1rem; }
+
+/* Disabled state for buttons (used instead of inline opacity/cursor) */
+.task-btn[disabled] { opacity: 0.6; cursor: not-allowed; }
+
+/* Utility helpers moved from inline styles */
+.relative-position { position: relative; }
+.flex-gap-4 { display: flex; gap: 4px; flex-shrink: 0; }
+.file-icon-purple { color: #7c3aed; flex-shrink: 0; }
+.images-heading-small { font-size: 0.75rem; color: #64748b; margin-bottom: 8px; }
+.icon-button-danger { background: none; border: none; cursor: pointer; padding: 4px; color: #ef4444; }
 .subtask-pill {
     display: inline-block;
     margin-left: 8px;
