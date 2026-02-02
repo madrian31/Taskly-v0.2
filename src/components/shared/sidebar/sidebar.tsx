@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./sidebar.css";
-import { menuItems } from "../../../../services/MenuServices";
+import { getMenuForRole } from "../../../../services/MenuServices";
 import { ReactNode } from "react";
 import AuthService from "../../../../services/authService";
 import { getAvatarUrl } from "../../../services/avatar";
@@ -17,6 +17,7 @@ export default function Sidebar({children}: SidebarProps) {
     const [userName, setUserName] = useState<string | null>(null);
     const [userEmail, setUserEmail] = useState<string | null>(null);
     const [userPhoto, setUserPhoto] = useState<string | null>(null);
+    const [userRole, setUserRole] = useState<string>('user');
 
     useEffect(() => {
         const unsubscribe = AuthService.onAuthStateChanged(async (user) => {
@@ -31,15 +32,21 @@ export default function Sidebar({children}: SidebarProps) {
                     console.log('Sidebar providerData:', user.providerData)
                     console.log('Sidebar userDoc from Firestore:', userDoc)
 
-                    if (userDoc && userDoc.photoURL) {
-                        setUserPhoto(userDoc.photoURL);
-                    } else {
+                        if (userDoc && userDoc.photoURL) {
+                            setUserPhoto(userDoc.photoURL);
+                        } else {
                         // Fallback to auth photoURL or providerData
                         const providerPhoto = user.providerData && user.providerData.length > 0
                             ? (user.providerData[0] as any).photoURL
                             : undefined;
                         setUserPhoto(user.photoURL ?? providerPhoto ?? null);
                     }
+                        // set role from user document (defaults to 'user' in model)
+                        if (userDoc && userDoc.role) {
+                            setUserRole(userDoc.role);
+                        } else {
+                            setUserRole('user');
+                        }
                 } catch (error) {
                     console.error('Failed to fetch user document:', error);
                     // Fallback to auth photoURL
@@ -52,6 +59,7 @@ export default function Sidebar({children}: SidebarProps) {
                 setUserName(null);
                 setUserEmail(null);
                 setUserPhoto(null);
+                setUserRole('user');
             }
         });
 
@@ -115,7 +123,7 @@ export default function Sidebar({children}: SidebarProps) {
                 
                 <ul>
                     {
-                        menuItems.map((item) => (
+                        getMenuForRole(userRole).map((item) => (
                             <li key={item.link || item.action}>
                                 {item.link ? (
                                     <Link to={item.link} onClick={closeSidebar}>

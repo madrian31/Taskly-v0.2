@@ -4,4 +4,5 @@ export interface MenuItem {
     icon: string;
     link?: string;
     action?: 'logout';
+    role?: 'everyone' | 'admin' | 'user';
 }
