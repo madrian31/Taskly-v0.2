@@ -2,12 +2,12 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { visualizer } from 'rollup-plugin-visualizer'
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
     react(),
     visualizer({ filename: './docs/stats.html', open: false })
   ],
-  base: '/Taskly-v0.2/',
+  base: command === 'build' ? '/Taskly-v0.2/' : '/',
   server: {
     port: 5500,
     host: true
@@ -32,4 +32,4 @@ export default defineConfig({
   define: {
     'process.env': {}
   }
-})
+}))

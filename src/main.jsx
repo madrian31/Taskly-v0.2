@@ -15,6 +15,7 @@ const Home = lazy(() => import('./pages/home/home.jsx'))
 const Task = lazy(() => import('./pages/task/task.tsx'))
 const Users = lazy(() => import('./pages/users/users.tsx'))
 const Dashboard = lazy(() => import('./pages/dashboard/dashboard.tsx'))
+const AccessNotAvailable = lazy(() => import('./pages/accessNotAvailable/accessNotAvailable.jsx'))
 
 // Layout Components (lazy-loaded)
 const Layout = lazy(() => import('./components/layout.jsx'))
@@ -31,6 +32,7 @@ createRoot(document.getElementById('root')).render(
 
           <Route element={<Layout/>}>
             <Route path="/login" element={<Login />} />
+            <Route path="/access-not-available" element={<AccessNotAvailable />} />
           </Route>
 
           <Route element={<RequireAuth><MainLayout /></RequireAuth>}>

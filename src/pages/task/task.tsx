@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import './task.css';
 import TaskModal from '../../components/ui/task/modal/TaskModal';
+import TaskList from '../../components/ui/task/TaskList';
 import '../../App.css';
 import Section from '../../components/shared/section/section';
 import { TaskRepository } from '../../../repository/TaskRepository';
@@ -411,6 +412,8 @@ function TaskComponent() {
         }
     }
 
+    const filteredTasks = getFilteredTasks();
+
     return (
         <Section id="task">
             {/* Professional Header Section */}
@@ -460,239 +463,24 @@ function TaskComponent() {
                 </div>
             </div>
 
-            {/* Task List */}
-            <div className="task-list-container">
-                {loading ? (
-                    <div className="loading-state">
-                        <Clock className="animate-spin" size={24} />
-                        <p>Loading tasks...</p>
-                    </div>
-                ) : getFilteredTasks().length === 0 ? (
-                    <div className="empty-state">
-                        <Circle size={48} className="text-slate-300" />
-                        <h3>No tasks found</h3>
-                        <p>Get started by creating your first task!</p>
-                        <button className="empty-state-button" onClick={() => openModal()}>
-                            <Plus size={20} />
-                            Create Task
-                        </button>
-                    </div>
-                ) : (
-                    <div className="tasks-list">
-                        {getFilteredTasks().map(task => {
-                            const taskSubtasks = task.id ? subtasks[task.id] || [] : [];
-                            // Filter displayed subtasks based on active filter
-                            const displayedSubtasks = activeFilter === 'all'
-                                ? taskSubtasks
-                                : taskSubtasks.filter(s => s.status === activeFilter);
-                            const subtaskDoneCount = taskSubtasks.filter(s => s.status === 'done').length;
-                            const hasSubtasks = displayedSubtasks.length > 0;
-                            const isExpanded = task.id ? expandedTasks.has(task.id) : false;
-                            const statusInfo = getStatusIcon(task.status);
-                            const priorityInfo = getPriorityInfo(task.priority);
-                            const StatusIcon = statusInfo.icon;
-
-                            return (
-                                <div key={task.id} className="task-row-container">
-                                    {/* Main Task Row */}
-                                    <div className="task-row">
-                                        {/* Expand/Collapse Button */}
-                                        <button 
-                                            className="expand-button"
-                                            onClick={() => task.id && hasSubtasks && toggleTaskExpansion(task.id)}
-                                            disabled={!hasSubtasks}
-                                        >
-                                            {hasSubtasks ? (
-                                                isExpanded ? 
-                                                <ChevronDown size={16} className="text-slate-500" /> : 
-                                                <ChevronRight size={16} className="text-slate-500" />
-                                            ) : (
-                                                <div className="w-4 h-4" /> /* Placeholder for alignment */
-                                            )}
-                                        </button>
-
-                                        {/* Task Content */}
-                                        <div className="task-content">
-                                            <div className="task-title-row">
-                                                <h3 className="task-title">
-                                                    {task.task_name}
-                                                    {task.id && (taskSubtasks.length > 0) && (
-                                                        <span className="subtask-pill" aria-label={`${subtaskDoneCount} of ${taskSubtasks.length} subtasks completed`}>
-                                                            {subtaskDoneCount}/{taskSubtasks.length}
-                                                        </span>
-                                                    )}
-                                                </h3>
-                                            </div>
-                                            {task.description && (
-                                                <p className="task-description">{task.description}</p>
-                                            )}
-                                        </div>
-
-                                        {/* Status Badge */}
-                                        <div className="status-badge">
-                                            <StatusIcon size={16} className={statusInfo.color} />
-                                            <span className="status-text">{task.status.replace('_', ' ')}</span>
-                                        </div>
-
-                                        {/* Priority Flag */}
-                                        <div className="priority-badge">
-                                            <Flag size={16} className={priorityInfo.color} />
-                                            <span className={`priority-text ${priorityInfo.color}`}>{priorityInfo.text}</span>
-                                        </div>
-
-                                        {/* Due Date */}
-                                        <div className="due-date">
-                                            <Calendar size={16} className="text-slate-500" />
-                                            <span className="due-date-text">{formatDueDate(task.due_date)}</span>
-                                        </div>
-
-                                        {/* Actions */}
-                                        <div className="task-actions-dropdown">
-                                            <div className="relative-position">
-                                                <button
-                                                    className="more-actions-button"
-                                                    onClick={(e) => { e.stopPropagation(); task.id && toggleDropdown(task.id); }}
-                                                    aria-expanded={openDropdownId === task.id}
-                                                >
-                                                    <MoreVertical size={16} className="text-slate-500" />
-                                                </button>
-
-                                                {openDropdownId === task.id && (
-                                                    isMobileView ? (
-                                                        <>
-                                                            <div className="mobile-sheet-backdrop" onClick={closeDropdown} />
-                                                            <div className="mobile-sheet" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-                                                                <div className="mobile-sheet-header">
-                                                                    <button className="mobile-sheet-close" onClick={closeDropdown} aria-label="Close">×</button>
-                                                                </div>
-                                                                <div className="mobile-sheet-content">
-                                                                    {/* Add Subtask - only for main tasks */}
-                                                                    {(task.parent_id === null || task.parent_id === undefined) && (
-                                                                        <div className="dropdown-item" onClick={() => { closeDropdown(); task.id && openModal(task.id); }}>
-                                                                            <Plus size={16} />
-                                                                            <span>Add Subtask</span>
-                                                                        </div>
-                                                                    )}
-
-                                                                    <div className="dropdown-item" onClick={() => { closeDropdown(); openEditModal(task); }}>
-                                                                        <Pencil size={16} />
-                                                                        <span>Edit Task</span>
-                                                                    </div>
-
-                                                                    <div className="dropdown-item delete" onClick={() => { closeDropdown(); task.id && deleteTask(task.id); }}>
-                                                                        <Trash size={16} />
-                                                                        <span>Delete Task</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </>
-                                                    ) : (
-                                                        <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
-                                                            {/* Add Subtask - only for main tasks */}
-                                                            {(task.parent_id === null || task.parent_id === undefined) && (
-                                                                <div className="dropdown-item" onClick={() => { closeDropdown(); task.id && openModal(task.id); }}>
-                                                                    <Plus size={14} />
-                                                                    <span>Add Subtask</span>
-                                                                </div>
-                                                            )}
-
-                                                            <div className="dropdown-item" onClick={() => { closeDropdown(); openEditModal(task); }}>
-                                                                <Pencil size={14} />
-                                                                <span>Edit Task</span>
-                                                            </div>
-
-                                                            <div className="dropdown-item delete" onClick={() => { closeDropdown(); task.id && deleteTask(task.id); }}>
-                                                                <Trash size={14} />
-                                                                <span>Delete Task</span>
-                                                            </div>
-                                                        </div>
-                                                    )
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Subtasks */}
-                                    {hasSubtasks && isExpanded && (
-                                        <div className="subtasks-container">
-                                            {/* Vertical connector line */}
-                                            <div className="connector-line" />
-                                            
-                                            {displayedSubtasks.map((subtask, index) => {
-                                                const subtaskStatusInfo = getStatusIcon(subtask.status);
-                                                const subtaskPriorityInfo = getPriorityInfo(subtask.priority);
-                                                const SubtaskStatusIcon = subtaskStatusInfo.icon;
-
-                                                return (
-                                                    <div key={subtask.id} className="subtask-row">
-                                                        {/* Horizontal connector */}
-                                                        <div className="horizontal-connector" />
-                                                        
-                                                        {/* Subtask Card */}
-                                                        <div className="subtask-card">
-                                                            <div className="expand-button-placeholder" />
-                                                            
-                                                            <div className="task-content">
-                                                                <div className="task-title-row">
-                                                                    <h4 className="subtask-title">{subtask.task_name}</h4>
-                                                                </div>
-                                                                {subtask.description && (
-                                                                    <p className="task-description">{subtask.description}</p>
-                                                                )}
-                                                            </div>
-
-                                                            <div className="status-badge">
-                                                                <SubtaskStatusIcon size={16} className={subtaskStatusInfo.color} />
-                                                                <span className="status-text">{subtask.status.replace('_', ' ')}</span>
-                                                            </div>
-
-                                                            <div className="priority-badge">
-                                                                <Flag size={16} className={subtaskPriorityInfo.color} />
-                                                                <span className={`priority-text ${subtaskPriorityInfo.color}`}>{subtaskPriorityInfo.text}</span>
-                                                            </div>
-
-                                                            <div className="due-date">
-                                                                <Calendar size={16} className="text-slate-500" />
-                                                                <span className="due-date-text">{formatDueDate(subtask.due_date)}</span>
-                                                            </div>
-
-                                                            <div className="task-actions-dropdown">
-                                                                <div className="relative-position">
-                                                                    <button
-                                                                        className="more-actions-button"
-                                                                        onClick={(e) => { e.stopPropagation(); subtask.id && toggleDropdown(subtask.id); }}
-                                                                        aria-expanded={openDropdownId === subtask.id}
-                                                                    >
-                                                                        <MoreVertical size={16} className="text-slate-500" />
-                                                                    </button>
-
-                                                                    {openDropdownId === subtask.id && (
-                                                                        <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
-                                                                            <div className="dropdown-item" onClick={() => { closeDropdown(); openEditModal(subtask); }}>
-                                                                                    <Pencil size={14} />
-                                                                                    <span>Edit Task</span>
-                                                                                </div>
-
-                                                                            <div className="dropdown-item delete" onClick={() => { closeDropdown(); subtask.id && deleteTask(subtask.id); }}>
-                                                                                <Trash size={14} />
-                                                                                <span>Delete Task</span>
-                                                                            </div>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
-            </div>
+            <TaskList
+                filteredTasks={filteredTasks}
+                subtasks={subtasks}
+                loading={loading}
+                isMobileView={isMobileView}
+                expandedTasks={expandedTasks}
+                openDropdownId={openDropdownId}
+                toggleTaskExpansion={toggleTaskExpansion}
+                toggleDropdown={toggleDropdown}
+                closeDropdown={closeDropdown}
+                openModal={openModal}
+                openEditModal={openEditModal}
+                deleteTask={deleteTask}
+                toggleTaskCompletion={toggleTaskCompletion}
+                formatDueDate={formatDueDate}
+                getStatusIcon={getStatusIcon}
+                getPriorityInfo={getPriorityInfo}
+            />
 
             <TaskModal
                 isOpen={showModal}
