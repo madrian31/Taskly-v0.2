@@ -13,20 +13,9 @@ export default function Login() {
   useEffect(() => {
     const unsubscribe = AuthService.onAuthStateChanged(async (user: User | null) => {
       if (user) {
-        try {
-          const userDoc = await UsersRepository.getById(user.uid)
-          const fetchedStatus = userDoc?.status ?? 'active'
-          if (fetchedStatus === 'active') {
-            navigate('/dashboard')
-          } else {
-            // If account is not active, send to access-not-available
-            navigate('/access-not-available')
-          }
-        } catch (err) {
-          console.error('Login: failed to fetch user document', err)
-          // If fetching fails, assume active and continue to dashboard
-          navigate('/dashboard')
-        }
+        // Do not require an "active" status on the login page — allow authenticated users
+        // to proceed to the dashboard and handle status-based access elsewhere if needed.
+        navigate('/dashboard')
       }
       setLoading(false)
     })
