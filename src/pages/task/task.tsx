@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import './task.css';
 import TaskModal from '../../components/ui/task/modal/TaskModal';
-import TaskList from '../../components/ui/task/TaskList';
+import TaskList from '../../components/ui/task/taskList/TaskList';
 import '../../App.css';
 import Section from '../../components/shared/section/section';
 import { TaskRepository } from '../../../repository/TaskRepository';
@@ -136,6 +136,16 @@ function TaskComponent() {
         } catch (error) {
             console.error('Error updating task:', error);
             alert('Error updating task: ' + (error as Error).message);
+        }
+    }
+
+    async function updateTaskStatus(taskId: string, newStatus: TaskStatus) {
+        try {
+            await taskService.updateStatus(taskId, newStatus);
+            await loadTasks();
+        } catch (error) {
+            console.error('Error updating task status:', error);
+            alert('Error updating task status: ' + (error as Error).message);
         }
     }
 
@@ -470,6 +480,7 @@ function TaskComponent() {
                 openEditModal={openEditModal}
                 deleteTask={deleteTask}
                 toggleTaskCompletion={toggleTaskCompletion}
+                updateTaskStatus={updateTaskStatus}
                 formatDueDate={formatDueDate}
                 getStatusIcon={getStatusIcon}
                 getPriorityInfo={getPriorityInfo}

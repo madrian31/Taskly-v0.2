@@ -1,6 +1,6 @@
 import React from 'react';
-import { Task, Attachment } from '../../../../model/Task';
-import { TaskStatus } from '../../../../model/Task';
+import { Task, Attachment } from '../../../../../model/Task';
+import { TaskStatus } from '../../../../../model/Task';
 import {
     ChevronDown,
     ChevronRight,
@@ -31,6 +31,7 @@ interface Props {
     openEditModal: (task: Task) => void;
     deleteTask: (id: string) => Promise<void>;
     toggleTaskCompletion: (id: string, isSubtask?: boolean) => Promise<void>;
+    updateTaskStatus: (taskId: string, newStatus: TaskStatus) => Promise<void>;
     formatDueDate: (d?: Date) => string;
     getStatusIcon: (status: TaskStatus) => { icon: any; color: string };
     getPriorityInfo: (p: number) => { color: string; text: string };
@@ -52,6 +53,7 @@ export default function TaskList(props: Props) {
         openEditModal,
         deleteTask,
         toggleTaskCompletion,
+        updateTaskStatus,
         formatDueDate,
         getStatusIcon,
         getPriorityInfo
@@ -80,10 +82,9 @@ export default function TaskList(props: Props) {
                         const taskSubtasks = task.id ? subtasks[task.id] || [] : [];
                         
                         // Filter subtasks based on activeFilter
-                        // "All" shows everything, specific filters show only matching status
                         const displayedSubtasks = activeFilter === 'all' 
-                            ? taskSubtasks  // Show ALL subtasks
-                            : taskSubtasks.filter(s => s.status === activeFilter);  // Filter by status
+                            ? taskSubtasks
+                            : taskSubtasks.filter(s => s.status === activeFilter);
                         
                         const subtaskDoneCount = taskSubtasks.filter(s => s.status === 'done').length;
                         const hasSubtasks = displayedSubtasks.length > 0;
@@ -159,6 +160,32 @@ export default function TaskList(props: Props) {
                                                                 <button className="mobile-sheet-close" onClick={closeDropdown} aria-label="Close">×</button>
                                                             </div>
                                                             <div className="mobile-sheet-content">
+                                                                {/* Quick Status Change - Only 3 statuses */}
+                                                                <div className="dropdown-section-title">Change Status</div>
+                                                                
+                                                                {task.status !== 'todo' && (
+                                                                    <div className="dropdown-item" onClick={() => { closeDropdown(); task.id && updateTaskStatus(task.id, 'todo'); }}>
+                                                                        <Circle size={16} className="text-slate-400" />
+                                                                        <span>Mark as To Do</span>
+                                                                    </div>
+                                                                )}
+                                                                
+                                                                {task.status !== 'in_progress' && (
+                                                                    <div className="dropdown-item" onClick={() => { closeDropdown(); task.id && updateTaskStatus(task.id, 'in_progress'); }}>
+                                                                        <Clock size={16} className="text-blue-500" />
+                                                                        <span>Mark as In Progress</span>
+                                                                    </div>
+                                                                )}
+                                                                
+                                                                {task.status !== 'done' && (
+                                                                    <div className="dropdown-item" onClick={() => { closeDropdown(); task.id && updateTaskStatus(task.id, 'done'); }}>
+                                                                        <CheckCircle2 size={16} className="text-emerald-500" />
+                                                                        <span>Mark as Done</span>
+                                                                    </div>
+                                                                )}
+
+                                                                <div className="dropdown-divider"></div>
+
                                                                 {(task.parent_id === null || task.parent_id === undefined) && (
                                                                     <div className="dropdown-item" onClick={() => { closeDropdown(); task.id && openModal(task.id); }}>
                                                                         <Plus size={16} />
@@ -180,6 +207,32 @@ export default function TaskList(props: Props) {
                                                     </div>
                                                 ) : (
                                                     <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
+                                                        {/* Quick Status Change - Only 3 statuses */}
+                                                        <div className="dropdown-section-title">Change Status</div>
+                                                        
+                                                        {task.status !== 'todo' && (
+                                                            <div className="dropdown-item" onClick={() => { closeDropdown(); task.id && updateTaskStatus(task.id, 'todo'); }}>
+                                                                <Circle size={14} className="text-slate-400" />
+                                                                <span>Mark as To Do</span>
+                                                            </div>
+                                                        )}
+                                                        
+                                                        {task.status !== 'in_progress' && (
+                                                            <div className="dropdown-item" onClick={() => { closeDropdown(); task.id && updateTaskStatus(task.id, 'in_progress'); }}>
+                                                                <Clock size={14} className="text-blue-500" />
+                                                                <span>Mark as In Progress</span>
+                                                            </div>
+                                                        )}
+                                                        
+                                                        {task.status !== 'done' && (
+                                                            <div className="dropdown-item" onClick={() => { closeDropdown(); task.id && updateTaskStatus(task.id, 'done'); }}>
+                                                                <CheckCircle2 size={14} className="text-emerald-500" />
+                                                                <span>Mark as Done</span>
+                                                            </div>
+                                                        )}
+
+                                                        <div className="dropdown-divider"></div>
+
                                                         {(task.parent_id === null || task.parent_id === undefined) && (
                                                             <div className="dropdown-item" onClick={() => { closeDropdown(); task.id && openModal(task.id); }}>
                                                                 <Plus size={14} />
@@ -252,6 +305,32 @@ export default function TaskList(props: Props) {
 
                                                                 {openDropdownId === subtask.id && (
                                                                     <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
+                                                                        {/* Quick Status Change for Subtasks - Only 3 statuses */}
+                                                                        <div className="dropdown-section-title">Change Status</div>
+                                                                        
+                                                                        {subtask.status !== 'todo' && (
+                                                                            <div className="dropdown-item" onClick={() => { closeDropdown(); subtask.id && updateTaskStatus(subtask.id, 'todo'); }}>
+                                                                                <Circle size={14} className="text-slate-400" />
+                                                                                <span>Mark as To Do</span>
+                                                                            </div>
+                                                                        )}
+                                                                        
+                                                                        {subtask.status !== 'in_progress' && (
+                                                                            <div className="dropdown-item" onClick={() => { closeDropdown(); subtask.id && updateTaskStatus(subtask.id, 'in_progress'); }}>
+                                                                                <Clock size={14} className="text-blue-500" />
+                                                                                <span>Mark as In Progress</span>
+                                                                            </div>
+                                                                        )}
+                                                                        
+                                                                        {subtask.status !== 'done' && (
+                                                                            <div className="dropdown-item" onClick={() => { closeDropdown(); subtask.id && updateTaskStatus(subtask.id, 'done'); }}>
+                                                                                <CheckCircle2 size={14} className="text-emerald-500" />
+                                                                                <span>Mark as Done</span>
+                                                                            </div>
+                                                                        )}
+
+                                                                        <div className="dropdown-divider"></div>
+
                                                                         <div className="dropdown-item" onClick={() => { closeDropdown(); openEditModal(subtask); }}>
                                                                             <Pencil size={14} />
                                                                             <span>Edit Task</span>

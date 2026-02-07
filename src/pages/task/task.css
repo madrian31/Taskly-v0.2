@@ -564,6 +564,28 @@
     color: var(--red-500);
 }
 
+/* Dropdown Section Title */
+.dropdown-section-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--slate-400);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 12px 4px 12px;
+    margin-top: 4px;
+}
+
+.dropdown-section-title:first-child {
+    margin-top: 0;
+}
+
+/* Dropdown Divider */
+.dropdown-divider {
+    height: 1px;
+    background: var(--slate-200);
+    margin: 8px 4px;
+}
+
 /* Subtasks Container */
 .subtasks-container {
     position: relative;
