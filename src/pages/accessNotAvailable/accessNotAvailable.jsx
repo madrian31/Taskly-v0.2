@@ -7,6 +7,8 @@ function AccessNotAvailable() {
                 
                 <h1>Access Not Available</h1>
                 <p>You do not have the necessary permissions to access this page.</p>
+                     
+                    <button onClick={() => window.location.href = '/login'}>Go to Login</button>
 
             </Section>
     )

@@ -36,7 +36,7 @@ createRoot(document.getElementById('root')).render(
           </Route>
 
           <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard" element={<RequireRole allowedRoles={["user","admin"]}><Dashboard /></RequireRole>} />
             <Route path="/task" element={<Task />} />
             <Route path="/users" element={<RequireRole allowedRoles={["admin"]}><Users /></RequireRole>} />
           </Route>
