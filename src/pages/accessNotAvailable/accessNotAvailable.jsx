@@ -1,6 +1,6 @@
 import '../../App.css'
 import Section from '../../components/shared/section/section'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import AuthService from '../../../services/authService'
 
 function AccessNotAvailable() {
