@@ -4,28 +4,32 @@ import { User } from 'firebase/auth'
 import Section from '../../components/shared/section/section'
 import AuthService from '../../../services/authService'
 import UsersRepository from '../../../repository/UsersRepository'
-import { User as FirebaseUser } from 'firebase/auth'
 
 export default function Login() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const unsubscribe = AuthService.onAuthStateChanged(async (user: User | null) => {
-      if (user) {
-        // Do not require an "active" status on the login page — allow authenticated users
-        // to proceed to the dashboard and handle status-based access elsewhere if needed.
-        navigate('/dashboard')
+    // Sign out user when login page loads
+    // Para hindi automatic redirect kahit naka-login pa
+    const initializePage = async () => {
+      try {
+        await AuthService.signOutUser()
+      } catch (error) {
+        console.error('Error signing out:', error)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
-    })
+    }
 
-    return () => unsubscribe()
-  }, [navigate])
+    initializePage()
+  }, [])
 
   const handleGoogleSignIn = async () => {
     try {
+      setLoading(true)
       const result = await AuthService.signInWithGoogle()
+      
       if (result && result.user) {
         // Determine photo URL: prefer User.photoURL, fall back to providerData
         const providerPhoto = result.user.providerData && result.user.providerData.length > 0
@@ -46,11 +50,27 @@ export default function Login() {
           console.error('Failed to upsert user:', upsertError)
         }
 
-        // Navigate to dashboard via SPA router (avoid full page reload)
-        navigate('/dashboard')
+        // Check user status before redirecting
+        try {
+          const userDoc = await UsersRepository.getById(result.user.uid)
+          const userStatus = userDoc?.status ?? 'active'
+
+          if (userStatus !== 'active') {
+            // User is inactive, redirect to access-not-available
+            navigate('/access-not-available')
+          } else {
+            // User is active, proceed to dashboard
+            navigate('/dashboard')
+          }
+        } catch (error) {
+          console.error('Error checking user status:', error)
+          // Fallback: redirect to dashboard if status check fails
+          navigate('/dashboard')
+        }
       }
     } catch (error) {
-      console.error(error)
+      console.error('Login error:', error)
+      setLoading(false)
     }
   }
 
