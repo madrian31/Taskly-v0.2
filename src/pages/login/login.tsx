@@ -11,10 +11,22 @@ export default function Login() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const unsubscribe = AuthService.onAuthStateChanged((user: User | null) => {
+    const unsubscribe = AuthService.onAuthStateChanged(async (user: User | null) => {
       if (user) {
-        // Use SPA navigation to dashboard when already authenticated
-        navigate('/dashboard')
+        try {
+          const userDoc = await UsersRepository.getById(user.uid)
+          const fetchedStatus = userDoc?.status ?? 'active'
+          if (fetchedStatus === 'active') {
+            navigate('/dashboard')
+          } else {
+            // If account is not active, send to access-not-available
+            navigate('/access-not-available')
+          }
+        } catch (err) {
+          console.error('Login: failed to fetch user document', err)
+          // If fetching fails, assume active and continue to dashboard
+          navigate('/dashboard')
+        }
       }
       setLoading(false)
     })
