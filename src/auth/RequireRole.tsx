@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import AuthService from '../../services/authService'
 import UsersRepository from '../../repository/UsersRepository'
 
@@ -10,10 +10,14 @@ interface Props {
 }
 
 export default function RequireRole({ children, allowedRoles, allowedStatuses }: Props) {
-   const [status, setStatus] = useState<string | undefined>(undefined)
+  const location = useLocation()
+  const [status, setStatus] = useState<string | undefined>(undefined)
   const [authUser, setAuthUser] = useState<any | null | undefined>(undefined)
   const [role, setRole] = useState<string | undefined>(undefined)
- 
+
+  // Public routes that don't need authentication
+  const publicRoutes = ['/login', '/access-not-available']
+  const isPublicRoute = publicRoutes.includes(location.pathname)
 
   useEffect(() => {
     const unsubscribe = AuthService.onAuthStateChanged(async (u: any) => {
@@ -26,7 +30,6 @@ export default function RequireRole({ children, allowedRoles, allowedStatuses }:
           const fetchedRole = userDoc?.role ?? 'user'
           setStatus(fetchedStatus)
           setRole(fetchedRole)
-         
 
           const allowedStatusesInternal = allowedStatuses ?? ['active']
 
@@ -47,6 +50,11 @@ export default function RequireRole({ children, allowedRoles, allowedStatuses }:
 
     return () => unsubscribe()
   }, [allowedStatuses])
+
+  // Allow public routes without authentication
+  if (isPublicRoute) {
+    return <>{children}</>
+  }
 
   if (authUser === undefined) return <div>Loading...</div>
   if (!authUser) return <Navigate to="/login" replace />

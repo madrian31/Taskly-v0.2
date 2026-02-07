@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import AuthService from '../../services/authService'
 import UsersRepository from '../../repository/UsersRepository'
 import { User } from 'firebase/auth'
@@ -9,8 +9,13 @@ interface Props {
 }
 
 export default function RequireAuth({ children }: Props) {
+  const location = useLocation()
   const [user, setUser] = useState<User | null | undefined>(undefined)
   const [status, setStatus] = useState<string | undefined>(undefined)
+
+  // Public routes that don't need authentication
+  const publicRoutes = ['/login', '/access-not-available']
+  const isPublicRoute = publicRoutes.includes(location.pathname)
 
   useEffect(() => {
     const unsubscribe = AuthService.onAuthStateChanged(async (u: User | null) => {
@@ -32,6 +37,11 @@ export default function RequireAuth({ children }: Props) {
 
     return () => unsubscribe()
   }, [])
+
+  // Allow public routes without authentication
+  if (isPublicRoute) {
+    return <>{children}</>
+  }
 
   // Still loading auth state
   if (user === undefined) return <div>Loading...</div>
