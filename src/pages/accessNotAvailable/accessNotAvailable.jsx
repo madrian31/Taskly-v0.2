@@ -8,13 +8,10 @@ function AccessNotAvailable() {
     
     const handleGoToLogin = async () => {
         try {
-            // Sign out first to ensure clean state
             await AuthService.signOutUser()
             // Then navigate to login
-            navigate('/login')
         } catch (error) {
             console.error('Error signing out:', error)
-            // Navigate anyway even if sign out fails
             navigate('/login')
         }
     }
