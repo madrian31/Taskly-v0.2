@@ -20,7 +20,8 @@ function AccessNotAvailable() {
         <Section id="access-not-available">
             <h1>Access Not Available</h1>
             <p>You do not have the necessary permissions to access this page.</p>
-            <button onClick={handleGoToLogin}>Go to Login</button>
+            {/* <button onClick={handleGoToLogin}>Go to Login</button> */}
+            <Link to="/login">Go to Login</Link>
         </Section>
     )
 }
