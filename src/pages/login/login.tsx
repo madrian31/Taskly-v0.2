@@ -45,10 +45,8 @@ export default function Login() {
           console.error('Failed to upsert user:', upsertError)
         }
 
-        // Immediately redirect to clear popup/COOP warnings
-        // and allow dashboard to reload/upsert any additional data
-        const target = `${window.location.origin}${window.location.pathname}?reload=1&newUser=1#/dashboard`
-        window.location.href = target
+        // Navigate to dashboard via SPA router (avoid full page reload)
+        navigate('/dashboard')
       }
     } catch (error) {
       console.error(error)

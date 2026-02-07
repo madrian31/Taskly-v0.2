@@ -23,6 +23,7 @@ interface Props {
     isMobileView: boolean;
     expandedTasks: Set<string>;
     openDropdownId: string | null;
+    activeFilter: string;
     toggleTaskExpansion: (taskId: string) => void;
     toggleDropdown: (taskId: string) => void;
     closeDropdown: () => void;
@@ -43,6 +44,7 @@ export default function TaskList(props: Props) {
         isMobileView,
         expandedTasks,
         openDropdownId,
+        activeFilter,
         toggleTaskExpansion,
         toggleDropdown,
         closeDropdown,
@@ -76,7 +78,13 @@ export default function TaskList(props: Props) {
                 <div className="tasks-list">
                     {filteredTasks.map(task => {
                         const taskSubtasks = task.id ? subtasks[task.id] || [] : [];
-                        const displayedSubtasks = taskSubtasks; // parent already filtered
+                        
+                        // Filter subtasks based on activeFilter
+                        // "All" shows everything, specific filters show only matching status
+                        const displayedSubtasks = activeFilter === 'all' 
+                            ? taskSubtasks  // Show ALL subtasks
+                            : taskSubtasks.filter(s => s.status === activeFilter);  // Filter by status
+                        
                         const subtaskDoneCount = taskSubtasks.filter(s => s.status === 'done').length;
                         const hasSubtasks = displayedSubtasks.length > 0;
                         const isExpanded = task.id ? expandedTasks.has(task.id) : false;

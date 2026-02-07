@@ -289,21 +289,13 @@ function TaskComponent() {
     function getFilteredTasks() {
         let filtered = tasks;
 
-        // Apply status filter: show parents with at least one subtask matching the filter
+        // Apply status filter: show parent if it has at least one subtask matching the filter
+        // (or show all parents if filter is 'all')
         if (activeFilter !== 'all') {
             filtered = filtered.filter(task => {
                 const subs = task.id ? (subtasks[task.id] || []) : [];
-
-                switch (activeFilter) {
-                    case 'todo':
-                        return subs.some(s => s.status === 'todo');
-                    case 'in_progress':
-                        return subs.some(s => s.status === 'in_progress');
-                    case 'done':
-                        return subs.some(s => s.status === 'done');
-                    default:
-                        return true;
-                }
+                // Show parent if it has at least one subtask matching the filter
+                return subs.some(s => s.status === activeFilter);
             });
         }
 
@@ -470,6 +462,7 @@ function TaskComponent() {
                 isMobileView={isMobileView}
                 expandedTasks={expandedTasks}
                 openDropdownId={openDropdownId}
+                activeFilter={activeFilter}
                 toggleTaskExpansion={toggleTaskExpansion}
                 toggleDropdown={toggleDropdown}
                 closeDropdown={closeDropdown}
