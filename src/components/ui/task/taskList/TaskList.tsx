@@ -112,7 +112,7 @@ function EmojiDropdownSection({
     return (
         <>
             <div className="dropdown-divider" />
-            <div className="dropdown-section-title">Emoji Rating</div>
+            <div className="dropdown-section-title">Rate This Task</div>
 
             <EmojiAccordionRow<DifficultyEmoji>
                 label="Difficulty"
