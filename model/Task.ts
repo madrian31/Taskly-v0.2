@@ -1,12 +1,13 @@
 export type TaskStatus = "todo" | "in_progress" | "blocked" | "done";
+import { Attachment } from "./Attachment";
 
-export interface Attachment {
-  id: string;
-  fileName: string;
-  fileUrl: string;
-  fileType: string;
-  uploadedAt: Date;
-}
+// export interface Attachment {
+//   id: string;
+//   fileName: string;
+//   fileUrl: string;
+//   fileType: string;
+//   uploadedAt: Date;
+// }
 
 export interface Task {
   id?: string;

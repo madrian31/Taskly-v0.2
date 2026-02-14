@@ -29,15 +29,38 @@ export class UsersRepository implements IUsersRepository {
 	/**
 	 * Upsert a user document using the auth UID as the document id.
 	 * This will create or update the document and set server timestamps.
+	 * For existing users, only updates basic profile info (displayName, email, photoURL, lastActive)
+	 * and preserves important fields like role, department, and status.
 	 */
 	async upsertByUid(uid: string, data: Partial<User>): Promise<void> {
 		const ref = doc(db, 'users', uid);
-		await setDoc(ref, {
-			...data,
-			uid,
-			updatedAt: serverTimestamp(),
-			createdAt: serverTimestamp(),
-		}, { merge: true });
+		const snap = await getDoc(ref);
+		
+		if (snap.exists()) {
+			// User exists - only update safe fields, preserve role/status/department
+			const updateData: any = {
+				updatedAt: serverTimestamp(),
+			};
+			
+			// Only update basic profile fields from auth provider
+			if (data.displayName !== undefined) updateData.displayName = data.displayName;
+			if (data.email !== undefined) updateData.email = data.email;
+			if (data.photoURL !== undefined) updateData.photoURL = data.photoURL;
+			if (data.lastActive !== undefined) updateData.lastActive = data.lastActive;
+			
+			await updateDoc(ref, updateData);
+		} else {
+			// New user - create with default role: 'user' and status: 'active'
+			// Users signing up with Google should be active by default.
+			await setDoc(ref, {
+				...data,
+				uid,
+				role: data.role ?? 'user', // Default role for new users
+				status: data.status ?? 'active', // Default status: active for OAuth sign-ins
+				createdAt: serverTimestamp(),
+				updatedAt: serverTimestamp(),
+			});
+		}
 	}
 
 	async update(id: string, data: Partial<User>): Promise<void> {
@@ -50,4 +73,3 @@ export class UsersRepository implements IUsersRepository {
 }
 
 export default new UsersRepository();
-

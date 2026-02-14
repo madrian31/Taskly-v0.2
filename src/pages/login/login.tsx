@@ -10,20 +10,20 @@ export default function Login() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Sign out user when login page loads
-    // Para hindi automatic redirect kahit naka-login pa
-    const initializePage = async () => {
-      try {
-        await AuthService.signOutUser()
-      } catch (error) {
-        console.error('Error signing out:', error)
-      } finally {
+    // Check if user is already logged in and redirect
+    const checkAuth = () => {
+      const currentUser = AuthService.getCurrentUser()
+      if (currentUser) {
+        // User is already logged in, redirect to dashboard
+        // Navigate using React Router instead of forcing a full reload
+        navigate('/dashboard', { replace: true })
+      } else {
         setLoading(false)
       }
     }
 
-    initializePage()
-  }, [])
+    checkAuth()
+  }, [navigate])
 
   const handleGoogleSignIn = async () => {
     try {
@@ -44,7 +44,7 @@ export default function Login() {
             displayName: result.user.displayName ?? undefined,
             email: result.user.email ?? undefined,
             photoURL: photo,
-            role: 'user',
+            // role: 'user',
           })
         } catch (upsertError) {
           console.error('Failed to upsert user:', upsertError)
@@ -56,16 +56,16 @@ export default function Login() {
           const userStatus = userDoc?.status ?? 'active'
 
           if (userStatus !== 'active') {
-            // User is inactive, redirect to access-not-available
-            navigate('/access-not-available')
+            // User is inactive, navigate to access-not-available
+            navigate('/access-not-available', { replace: true })
           } else {
-            // User is active, proceed to dashboard
-            navigate('/dashboard')
+            // User is active, navigate to dashboard
+            navigate('/dashboard', { replace: true })
           }
         } catch (error) {
           console.error('Error checking user status:', error)
-          // Fallback: redirect to dashboard if status check fails
-          navigate('/dashboard')
+          // Fallback: navigate to dashboard if status check fails
+          navigate('/dashboard', { replace: true })
         }
       }
     } catch (error) {
