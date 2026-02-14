@@ -37,11 +37,8 @@ export class TaskRepository implements ITaskRepository {
     const uid = this.getCurrentUid();
     if (!uid) return [];
 
-    // Use a query to fetch tasks owned by the user that are main tasks (parent_id == null)
     const q = query(this.ref, where('owner_uid', '==', uid), where('parent_id', '==', null));
     const snap = await getDocs(q);
-
-    // Fallback: if data model has some docs without parent_id field, filter locally
     const results = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     return results as Task[];
   }
@@ -53,7 +50,6 @@ export class TaskRepository implements ITaskRepository {
 
     const q = query(this.ref, where('owner_uid', '==', uid), where("parent_id", "==", parentId));
     const snap = await getDocs(q);
-
     return snap.docs.map(d => ({ id: d.id, ...d.data() })) as Task[];
   }
 
@@ -70,10 +66,7 @@ export class TaskRepository implements ITaskRepository {
 
     if (data.owner_uid && data.owner_uid !== uid) return null;
 
-    return {
-      id: snap.id,
-      ...data
-    } as Task;
+    return { id: snap.id, ...data } as Task;
   }
 
   // 🔹 Create task or subtask
@@ -82,30 +75,30 @@ export class TaskRepository implements ITaskRepository {
       throw new Error("Priority must be between 1 and 4");
     }
 
-    const now = Timestamp.now();
+    if (!task.task_name || task.task_name.trim() === '') {
+      throw new Error("Task name is required");
+    }
 
+    const now = Timestamp.now();
     const uid = this.getCurrentUid();
     if (!uid) throw new Error('Not authenticated');
 
     await addDoc(this.ref, {
       task_name: task.task_name,
       description: task.description ?? null,
-
-      parent_id: task.parent_id ?? null, // ✅ SUBTASK SUPPORT
-
+      parent_id: task.parent_id ?? null,
       status: task.status ?? "todo",
       priority: task.priority,
+      due_date: task.due_date ? Timestamp.fromDate(task.due_date) : null,
+      attachments: task.attachments ?? null,
 
-      due_date: task.due_date
-        ? Timestamp.fromDate(task.due_date)
-        : null,
-
-      attachments: task.attachments ?? null, // ✅ ADD ATTACHMENTS
+      // ✅ NEW: Emoji fields
+      difficulty_emoji: task.difficulty_emoji ?? null,
+      completion_mood: task.completion_mood ?? null,
 
       created_at: now,
       updated_at: now,
-      completed_at: task.status === "done" ? now : null
-      ,
+      completed_at: task.status === "done" ? now : null,
       owner_uid: uid
     });
   }
@@ -119,7 +112,6 @@ export class TaskRepository implements ITaskRepository {
     const now = Timestamp.now();
     const ref = doc(db, "tasks", id);
 
-    // Ensure ownership before updating
     const snap = await getDoc(ref);
     const uid = this.getCurrentUid();
     if (!uid) throw new Error('Not authenticated');
@@ -135,7 +127,7 @@ export class TaskRepository implements ITaskRepository {
     });
   }
 
-  // 🔹 Update task fields (partial)
+  // 🔹 Update task fields (partial) — supports emoji fields
   async updateTask(id: string, data: Partial<Task>): Promise<void> {
     const now = Timestamp.now();
     const refDoc = doc(db, "tasks", id);
@@ -147,14 +139,16 @@ export class TaskRepository implements ITaskRepository {
       payload.due_date = Timestamp.fromDate(data.due_date as Date);
     }
 
-    // Remove any keys with `undefined` values because Firestore rejects them
+    // ✅ Explicitly allow null for emoji fields (clearing them)
+    // Don't delete keys that are intentionally null
+    const nullableFields = ['difficulty_emoji', 'completion_mood'];
+
     Object.keys(payload).forEach((k) => {
-      if (payload[k] === undefined) {
+      if (payload[k] === undefined && !nullableFields.includes(k)) {
         delete payload[k];
       }
     });
 
-    // Ensure ownership before updating
     const snap = await getDoc(refDoc);
     const uid = this.getCurrentUid();
     if (!uid) throw new Error('Not authenticated');
@@ -166,7 +160,7 @@ export class TaskRepository implements ITaskRepository {
     await updateDoc(refDoc, payload);
   }
 
-  // 🔹 Delete task (and subtasks logically)
+  // 🔹 Delete task
   async deleteTask(id: string): Promise<void> {
     const refDoc = doc(db, "tasks", id);
     const snap = await getDoc(refDoc);

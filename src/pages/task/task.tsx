@@ -7,7 +7,7 @@ import Section from '../../components/shared/section/section';
 import { TaskRepository } from '../../../repository/TaskRepository';
 import { TaskService } from '../../../services/TaskService';
 import { FileUploadService } from '../../../services/FileUploadService';
-import { Task, Attachment } from '../../../model/Task';
+import { Task, Attachment, DifficultyEmoji, CompletionMoodEmoji } from '../../../model/Task';
 import { TaskStatus } from '../../../model/Task';
 import { 
     ChevronDown, 
@@ -58,6 +58,8 @@ function TaskComponent() {
         status: 'todo' as TaskStatus,
         due_date: '' as string,
     });
+    const [difficultyEmoji, setDifficultyEmoji] = useState<DifficultyEmoji | null>(null);
+    const [completionMood, setCompletionMood] = useState<CompletionMoodEmoji | null>(null);
     const [showValidationErrors, setShowValidationErrors] = useState<boolean>(false);
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
     const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -149,6 +151,20 @@ function TaskComponent() {
         }
     }
 
+    async function updateTaskEmoji(
+        taskId: string,
+        field: 'difficulty_emoji' | 'completion_mood',
+        value: DifficultyEmoji | CompletionMoodEmoji | null
+    ) {
+        try {
+            await taskRepository.updateTask(taskId, { [field]: value });
+            await loadTasks();
+        } catch (error) {
+            console.error('Error updating emoji:', error);
+            alert('Error updating emoji: ' + (error as Error).message);
+        }
+    }
+
     async function deleteTask(id: string) {
         try {
             await taskService.deleteTask(id);
@@ -171,6 +187,8 @@ function TaskComponent() {
         setEditingTaskId(null);
         setUploadedFiles([]);
         setAttachments([]);
+        setDifficultyEmoji(null);
+        setCompletionMood(null);
         
         if (parentId) {
             setIsSubtaskMode(true);
@@ -191,6 +209,8 @@ function TaskComponent() {
         setEditingTaskId(null);
         setUploadedFiles([]);
         setAttachments([]);
+        setDifficultyEmoji(null);
+        setCompletionMood(null);
     }
 
     function openEditModal(task: Task) {
@@ -212,6 +232,9 @@ function TaskComponent() {
         // Load existing attachments
         setAttachments(task.attachments || []);
         setUploadedFiles([]);
+        // ✅ Load emoji ratings
+        setDifficultyEmoji(task.difficulty_emoji ?? null);
+        setCompletionMood(task.completion_mood ?? null);
         setShowModal(true);
     }
 
@@ -385,6 +408,9 @@ function TaskComponent() {
                 due_date: form.due_date ? new Date(form.due_date) : undefined,
                 parent_id: isSubtaskMode && parentTaskId ? parentTaskId : undefined,
                 attachments: uploadedAttachments.length > 0 ? uploadedAttachments : undefined,
+                // ✅ Emoji rating fields
+                difficulty_emoji: difficultyEmoji ?? null,
+                completion_mood: completionMood ?? null,
             };
             
             console.log('Submitting task:', payload);
@@ -481,6 +507,7 @@ function TaskComponent() {
                 deleteTask={deleteTask}
                 toggleTaskCompletion={toggleTaskCompletion}
                 updateTaskStatus={updateTaskStatus}
+                updateTaskEmoji={updateTaskEmoji}
                 formatDueDate={formatDueDate}
                 getStatusIcon={getStatusIcon}
                 getPriorityInfo={getPriorityInfo}
@@ -505,6 +532,11 @@ function TaskComponent() {
                 isSubtaskMode={isSubtaskMode}
                 showValidationErrors={showValidationErrors}
                 fileUploadService={fileUploadService}
+                // ✅ Emoji rating props
+                difficultyEmoji={difficultyEmoji}
+                completionMood={completionMood}
+                onDifficultyChange={setDifficultyEmoji}
+                onMoodChange={setCompletionMood}
             />
 
         </Section>

@@ -6,7 +6,7 @@ import {
     Download,
     Trash2
 } from 'lucide-react';
-import { Attachment } from '../../../../../model/Task';
+import { Attachment, DifficultyEmoji, CompletionMoodEmoji } from '../../../../../model/Task';
 import { FileUploadService } from '../../../../../services/FileUploadService';
 
 type TaskForm = {
@@ -36,6 +36,10 @@ interface Props {
     isSubtaskMode: boolean;
     showValidationErrors: boolean;
     fileUploadService: FileUploadService;
+    difficultyEmoji: DifficultyEmoji | null;
+    completionMood: CompletionMoodEmoji | null;
+    onDifficultyChange: React.Dispatch<React.SetStateAction<DifficultyEmoji | null>>;
+    onMoodChange: React.Dispatch<React.SetStateAction<CompletionMoodEmoji | null>>;
 }
 
 export default function TaskModal({
@@ -56,7 +60,11 @@ export default function TaskModal({
     editingTaskId,
     isSubtaskMode,
     showValidationErrors,
-    fileUploadService
+    fileUploadService,
+    difficultyEmoji,
+    completionMood,
+    onDifficultyChange,
+    onMoodChange
 }: Props) {
     if (!isOpen && !showSuccess) return null;
 
