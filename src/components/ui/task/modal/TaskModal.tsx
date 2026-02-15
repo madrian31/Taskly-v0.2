@@ -1,5 +1,6 @@
 import React from 'react';
 import './TaskModal.css';
+import './../emojiRatingPicker/EmojiRatingPicker.css';
 import {
     FileUp,
     File,

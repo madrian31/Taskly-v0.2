@@ -442,15 +442,51 @@
   padding: 4px 5px;
   font-size: 1.2rem;
   flex: 1;
+  position: relative;
 }
 
+/* Label hidden on desktop (tooltip handles it), visible on mobile */
 .emoji-accordion-opt-label {
   font-size: 0.6rem;
   color: var(--text-muted, #9ca3af);
   white-space: nowrap;
   font-weight: 500;
+  display: none;
 }
 
 .emoji-accordion-options .dropdown-emoji-btn.active .emoji-accordion-opt-label {
   color: var(--primary, #6366f1);
+}
+
+/* Desktop tooltip via data-tip */
+.emoji-accordion-options .dropdown-emoji-btn::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: #fff;
+  font-size: 0.68rem;
+  padding: 3px 7px;
+  border-radius: 5px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 999;
+}
+
+.emoji-accordion-options .dropdown-emoji-btn:hover::after {
+  opacity: 1;
+}
+
+/* Mobile — show label text instead of tooltip */
+@media (max-width: 480px) {
+  .emoji-accordion-opt-label {
+    display: block;
+  }
+  .emoji-accordion-options .dropdown-emoji-btn::after {
+    display: none;
+  }
 }

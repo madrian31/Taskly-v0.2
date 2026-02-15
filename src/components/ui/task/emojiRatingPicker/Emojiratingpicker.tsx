@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Emojiratingpicker.css';
+// import './EmojiRatingPicker.css';    
 import {
   DifficultyEmoji,
   CompletionMoodEmoji,

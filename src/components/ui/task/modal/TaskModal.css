@@ -1,492 +1,466 @@
-/* ─────────────────────────────────────────────────────────
-   EmojiRatingPicker.css
-   Styles for the difficulty + mood emoji rating component
-───────────────────────────────────────────────────────── */
+.task-modal-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.6);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 9999;
 
-/* Container */
-.emoji-rating-picker {
-  border: 1.5px solid var(--border, #e5e7eb);
-  border-radius: 10px;
-  overflow: hidden;
-  background: var(--surface, #fafafa);
-  margin-top: 4px;
-  transition: border-color 0.2s;
 }
 
-.emoji-rating-picker:focus-within {
-  border-color: var(--primary, #6366f1);
+.task-modal {
+	background: #ffffff;
+	border-radius: 8px;
+	max-width: 520px;
+	width: 94%;
+	box-shadow: 0 10px 30px rgba(2, 6, 23, 0.2);
+	border: 1px solid rgba(15, 23, 42, 0.06);
+	/* allow native popups (datepicker) to escape modal bounds */
+	overflow: visible;
 }
 
-/* ── Toggle button (header) ── */
-.emoji-picker-toggle {
-  width: 100%;
+.task-modal-header {
+
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  gap: 8px;
-  font-size: 0.875rem;
-  color: var(--text-primary, #374151);
+	padding: 18px 20px;
+	border-bottom: 1px solid #eef2f6;
+
+
+
+
+
 }
 
-.emoji-picker-toggle:hover {
-  background: var(--hover-bg, #f3f4f6);
+.task-modal-title {
+	margin: 0;
+	font-size: 1.125rem;
+	color: #0f172a;
+	font-weight: 600;
 }
 
-.emoji-picker-toggle-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+.task-modal-close-btn {
+	background: transparent;
+	border: 0;
+	font-size: 18px;
 
-.emoji-picker-toggle-icon {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 1.15rem;
+
+
+
+
+
+
   line-height: 1;
+	color: #64748b;
+	cursor: pointer;
+	padding: 6px;
+	border-radius: 6px;
 }
 
-.emoji-divider {
-  color: var(--text-muted, #9ca3af);
-  font-size: 0.75rem;
+.task-modal-close-btn:hover {
+	background: #f1f5f9;
+
 }
 
-.emoji-picker-toggle-label {
-  font-weight: 500;
-  color: var(--text-secondary, #6b7280);
-  font-size: 0.82rem;
-  letter-spacing: 0.01em;
+.task-modal-body {
+	padding: 18px 20px 16px;
+
+
+
 }
 
-.emoji-picker-chevron {
-  font-size: 1rem;
-  color: var(--text-muted, #9ca3af);
-  transition: transform 0.2s ease;
-  display: inline-block;
-}
+.task-form-group {
 
-.emoji-picker-chevron.open {
-  transform: rotate(180deg);
-}
 
-/* ── Expanded body ── */
-.emoji-picker-body {
-  padding: 12px 14px 14px;
-  border-top: 1px solid var(--border, #e5e7eb);
+
+
+
+
+
+
+
+
+
+
+
+
   display: flex;
   flex-direction: column;
-  gap: 0;
-  animation: emojiSlideDown 0.18s ease;
+	margin-bottom: 14px;
+
 }
 
-@keyframes emojiSlideDown {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* allow popup positioned inside form group */
+.task-form-group { position: relative; }
+
+
+
+.custom-datepicker {
+	position: absolute;
+	left: 0;
+	top: calc(100% + 8px);
+	width: 320px;
+	background: #fff;
+	border-radius: 8px;
+	box-shadow: 0 8px 30px rgba(2,6,23,0.15);
+	border: 1px solid rgba(15,23,42,0.06);
+	z-index: 12000;
 }
 
-.emoji-row-divider {
-  height: 1px;
-  background: var(--border-light, #f0f0f0);
-  margin: 10px 0;
-}
+.custom-datepicker-header {
+	padding: 12px 16px;
 
-/* ── Row ── */
-.emoji-row {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
 
-.emoji-row-header {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
 
-.emoji-row-label {
-  font-size: 0.8rem;
+
+
+
+
+
+
+
+
+
+
   font-weight: 600;
-  color: var(--text-primary, #374151);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+	color: #0f172a;
+	border-bottom: 1px solid #eef2f6;
+
 }
 
-.emoji-row-sublabel {
-  font-size: 0.75rem;
-  color: var(--text-muted, #9ca3af);
-}
+.quick-select-btn {
+	padding: 8px 12px;
+	background: #f1f5f9;
+	border: 1px solid #e6eef8;
 
-/* ── Emoji option buttons ── */
-.emoji-option-list {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
 
-.emoji-option-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  padding: 7px 10px;
-  border: 1.5px solid var(--border, #e5e7eb);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   border-radius: 8px;
-  background: var(--card-bg, #fff);
+
   cursor: pointer;
-  transition: all 0.15s ease;
-  min-width: 56px;
-  position: relative;
+
+
+
 }
 
-.emoji-option-btn:hover {
-  border-color: var(--primary, #6366f1);
-  background: var(--primary-light, #eef2ff);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.12);
+.quick-select-btn:hover { background: #eef2ff; }
+
+
+
+
+
+
+.task-form-label {
+	font-size: 0.875rem;
+	color: #475569;
+	margin-bottom: 8px;
+	text-align: left;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
-.emoji-option-btn.active {
-  border-color: var(--primary, #6366f1);
-  background: var(--primary-light, #eef2ff);
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-}
+.task-input-field {
+	padding: 10px 12px;
+	border: 1px solid #e6eef8;
 
-.emoji-option-btn.active::after {
-  content: '';
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--primary, #6366f1);
-}
 
-.emoji-option-icon {
-  font-size: 1.5rem;
-  line-height: 1;
-  display: block;
-}
 
-.emoji-option-name {
-  font-size: 0.68rem;
-  font-weight: 500;
-  color: var(--text-secondary, #6b7280);
-  white-space: nowrap;
-}
 
-.emoji-option-btn.active .emoji-option-name {
-  color: var(--primary, #6366f1);
-  font-weight: 600;
-}
-
-/* ── Selected summary bar ── */
-.emoji-selected-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--primary-light, #eef2ff);
-  border: 1px solid var(--primary-border, #c7d2fe);
   border-radius: 6px;
-  padding: 5px 10px;
-  font-size: 0.8rem;
-  color: var(--text-primary, #374151);
-  animation: fadeIn 0.15s ease;
+	font-size: 0.95rem;
+	background: #fff;
+	color: #0f172a;
+	/* height: 40px; */
+    width: auto;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+.task-input-field[type="date"] {
+	height: 44px;
+
 }
 
-.emoji-selected-summary strong {
-  color: var(--primary-dark, #4338ca);
+.task-input-field textarea {
+	min-height: 90px;
+	resize: vertical;
+	padding-top: 10px;
 }
 
-.emoji-clear-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-muted, #9ca3af);
-  font-size: 0.75rem;
-  padding: 2px 4px;
-  border-radius: 4px;
-  transition: color 0.15s, background 0.15s;
-  flex-shrink: 0;
+.task-input-field:focus {
+	outline: none;
+	box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.06);
+	border-color: #2563eb;
+
+
+
+
+
+
 }
 
-.emoji-clear-btn:hover {
-  color: var(--danger, #ef4444);
-  background: var(--danger-light, #fee2e2);
+.task-error-message {
+	color: #dc2626;
+	font-size: 0.85rem;
+	margin-top: 6px;
+	display: none;
 }
 
-/* ── Compact mode (inside modal) ── */
-.emoji-rating-picker.compact .emoji-picker-toggle {
-  padding: 8px 12px;
+.task-form-row {
+	display: flex;
+	gap: 12px;
 }
 
-.emoji-rating-picker.compact .emoji-picker-body {
-  padding: 10px 12px 12px;
-}
+.task-form-row .task-form-group {
+	flex: 1;
 
-.emoji-rating-picker.compact .emoji-option-btn {
-  min-width: 48px;
-  padding: 6px 8px;
-}
 
-.emoji-rating-picker.compact .emoji-option-icon {
-  font-size: 1.3rem;
-}
 
-/* ── Task card display badge ── */
-.emoji-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 1rem;
-  line-height: 1;
-  cursor: default;
-}
 
-.emoji-badge-tooltip {
-  position: relative;
-}
 
-.emoji-badge-tooltip:hover::after {
-  content: attr(data-tip);
-  position: absolute;
-  bottom: calc(100% + 5px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: #1f2937;
-  color: #fff;
-  font-size: 0.7rem;
-  padding: 3px 7px;
-  border-radius: 4px;
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 100;
-}
 
-/* ── Responsive ── */
-@media (max-width: 480px) {
-  .emoji-option-list {
-    gap: 4px;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   }
 
-  .emoji-option-btn {
-    min-width: 46px;
-    padding: 6px 7px;
-  }
+.task-priority-label-header {
 
-  .emoji-option-icon {
-    font-size: 1.25rem;
-  }
 
-  .emoji-option-name {
-    font-size: 0.62rem;
-  }
-}
 
-/* ─────────────────────────────────────────────────────────
-   Dropdown inline emoji section (inside task dropdown menu)
-───────────────────────────────────────────────────────── */
 
-.dropdown-emoji-row {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 5px 12px;
+
 }
 
-.dropdown-emoji-label {
-  font-size: 0.72rem;
-  color: var(--text-muted, #9ca3af);
-  font-weight: 500;
-  min-width: 52px;
-  flex-shrink: 0;
+.task-info-icon {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	border-radius: 4px;
+	background: #eef2ff;
+	color: #3730a3;
+	font-size: 12px;
+	line-height: 18px;
+	text-align: center;
 }
 
-.dropdown-emoji-options {
+.task-modal-footer {
   display: flex;
-  gap: 3px;
+	justify-content: flex-end;
+	gap: 12px;
+	padding: 12px 20px;
+	border-top: 1px solid #eef2f6;
+	background: #fff;
 }
 
-.dropdown-emoji-btn {
-  font-size: 1.15rem;
-  background: none;
-  border: 1.5px solid transparent;
-  border-radius: 6px;
-  padding: 2px 4px;
+.task-btn {
+	padding: 8px 14px;
+	border-radius: 8px;
+	border: 1px solid transparent;
+	background: #fff;
+
   cursor: pointer;
-  line-height: 1;
-  transition: all 0.12s ease;
-  opacity: 0.55;
+
+
+
 }
 
-.dropdown-emoji-btn:hover {
-  opacity: 1;
-  background: var(--hover-bg, #f3f4f6);
-  border-color: var(--border, #e5e7eb);
-  transform: scale(1.15);
+.task-btn-cancel {
+	background: #475569;
+	border-color: #e6eef8;
+
+
 }
 
-.dropdown-emoji-btn.active {
-  opacity: 1;
-  background: var(--primary-light, #eef2ff);
-  border-color: var(--primary, #6366f1);
-  transform: scale(1.1);
+.task-btn-primary {
+	background: #2563eb;
+	color: #fff;
+	border-color: #2563eb;
+
 }
 
-/* ─────────────────────────────────────────────────────────
-   Task card emoji badge chips (beside task name)
-───────────────────────────────────────────────────────── */
+.task-btn:active {
+	transform: translateY(1px);
 
-.task-emoji-badges {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  margin-left: 6px;
-  vertical-align: middle;
+
+
+
+
+
+
+
 }
 
-.emoji-badge-chip {
-  font-size: 0.95rem;
-  line-height: 1;
-  cursor: default;
-  display: inline-block;
-  transition: transform 0.15s ease;
-}
+@media (max-width: 600px) {
+	.task-form-row {
 
-.emoji-badge-chip:hover {
-  transform: scale(1.3);
-}
 
-/* ─────────────────────────────────────────────────────────
-   Accordion emoji rows inside dropdown
-───────────────────────────────────────────────────────── */
 
-.emoji-accordion-row {
-  display: flex;
+
+
+
+
+
+
+
+
+
+
+
+
+
   flex-direction: column;
 }
 
-/* Header button — always shown */
-.emoji-accordion-header {
+	.task-modal {
+		width: 94%;
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+}
+
+/* Keep FAB above modal overlay */
+.fab {
+	position: fixed;
+	right: 22px;
+	bottom: 22px;
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 6px 12px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-  gap: 6px;
-  transition: background 0.12s;
+	justify-content: center;
+	font-size: 26px;
+	background: #2563eb;
+	color: #fff;
+	border: 0;
+	box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+	z-index: 10000;
 }
 
-.emoji-accordion-header:hover {
-  background: var(--hover-bg, #f3f4f6);
+/* Success modal variants for compact / centered layout */
+.task-modal--small { max-width: 400px; text-align: center; }
+.task-modal-header--compact { border-bottom: none; justify-content: flex-end; padding: 12px 16px; }
+.task-modal-body--success { padding: 20px 32px 32px; }
+
+
+
+.success-icon-circle {
+	width: 80px;
+	height: 80px;
+	margin: 0 auto 24px;
+	border-radius: 50%;
+	background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(124,58,237,0.05));
+  	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 3px solid #7c3aed;
 }
 
-.emoji-accordion-left {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
+.success-title { font-size: 1.5rem; color: #0f172a; margin-bottom: 12px; font-weight: 600; }
+.success-message { color: #64748b; font-size: 0.95rem; margin-bottom: 28px; }
 
-.emoji-accordion-icon {
-  font-size: 1.05rem;
-  line-height: 1;
-  min-width: 18px;
-  text-align: center;
-}
-
-.emoji-accordion-label {
-  font-size: 0.82rem;
-  color: var(--text-primary, #374151);
-  font-weight: 500;
-}
-
-.emoji-accordion-chevron {
-  font-size: 0.8rem;
-  color: var(--text-muted, #9ca3af);
-  transition: transform 0.15s ease;
-  display: inline-block;
-  margin-left: auto;
-}
-
-.emoji-accordion-chevron.open {
-  transform: rotate(180deg);
-}
-
-/* Options row — shown when expanded */
-.emoji-accordion-options {
-  display: flex;
-  gap: 2px;
-  padding: 4px 12px 8px;
-  flex-wrap: nowrap;
-  animation: emojiSlideDown 0.15s ease;
-}
-
-.emoji-accordion-options .dropdown-emoji-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 4px 5px;
-  font-size: 1.2rem;
-  flex: 1;
-  position: relative;
-}
-
-/* Label hidden on desktop (tooltip handles it), visible on mobile */
-.emoji-accordion-opt-label {
-  font-size: 0.6rem;
-  color: var(--text-muted, #9ca3af);
-  white-space: nowrap;
-  font-weight: 500;
-  display: none;
-}
-
-.emoji-accordion-options .dropdown-emoji-btn.active .emoji-accordion-opt-label {
-  color: var(--primary, #6366f1);
-}
-
-/* Desktop tooltip via data-tip */
-.emoji-accordion-options .dropdown-emoji-btn::after {
-  content: attr(data-tip);
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: #1f2937;
-  color: #fff;
-  font-size: 0.68rem;
-  padding: 3px 7px;
-  border-radius: 5px;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-  z-index: 999;
-}
-
-.emoji-accordion-options .dropdown-emoji-btn:hover::after {
-  opacity: 1;
-}
-
-/* Mobile — show label text instead of tooltip */
-@media (max-width: 480px) {
-  .emoji-accordion-opt-label {
-    display: block;
-  }
-  .emoji-accordion-options .dropdown-emoji-btn::after {
-    display: none;
-  }
-}
