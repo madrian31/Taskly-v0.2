@@ -184,7 +184,7 @@
     min-height: 400px;
     height: auto;
     box-shadow: var(--shadow-sm);
-    overflow-x: hidden;
+    /* overflow-x: hidden; */
     width: 100%;
     box-sizing: border-box;
 }
@@ -1153,7 +1153,7 @@
     
     .task-actions-dropdown {
         position: relative;
-        z-index: 100;
+        /* z-index: 100; */
     }
     
     .dropdown-menu {
