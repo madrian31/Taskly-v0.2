@@ -176,6 +176,14 @@
     color: white;
 }
 
+/* MOVED TO src/components/ui/task/taskList/Tasklist.css
+   The task-list related rules below were migrated to a dedicated
+   Tasklist.css file to keep the page stylesheet focused on the
+   surrounding page layout. The original definitions are preserved
+   here (commented) for reference in case you need to roll back.
+*/
+
+/*
 /* Task List Container */
 .task-list-container {
     background: white;
@@ -184,7 +192,6 @@
     min-height: 400px;
     height: auto;
     box-shadow: var(--shadow-sm);
-    /* overflow-x: hidden; */
     width: 100%;
     box-sizing: border-box;
 }
@@ -237,7 +244,6 @@
     padding: 16px;
     width: 100%;
     box-sizing: border-box;
-    /* overflow-x: hidden; */
 }
 
 /* Task Row Container */
@@ -268,8 +274,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* width: 24px; */
-    /* height: 24px; */
     border: none;
     background: none;
     cursor: pointer;
@@ -302,11 +306,6 @@
     stroke: currentColor;
 }
 
-/* Guarantee our utility color classes apply to SVGs */
-.text-slate-300, .text-slate-400, .text-slate-500, .text-blue-500, .text-orange-500, .text-red-500, .text-emerald-500 {
-    color: inherit;
-}
-
 /* Task Content */
 .task-content {
     flex: 1;
@@ -327,6 +326,7 @@
     margin: 0;
     line-height: 1.4;
 }
+*/
 
 /* Required star */
 .required-star { color: #dc2626; }

@@ -1,0 +1,187 @@
+
+.task-list-container {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid var(--slate-200);
+  min-height: 400px;
+  height: auto;
+  box-shadow: var(--shadow-sm);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Loading / empty states shown inside the list container */
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.empty-state-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: var(--slate-900);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+/* === Tasks list wrapper (padding inside the card) === */
+.tasks-list {
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Single task row container (outer spacing between rows) */
+.task-row-container { margin-bottom: 8px; }
+
+/* === Single task row ===
+   Purpose: the visible card for each task (title, badges, actions, etc.).
+*/
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: white;
+  border: 1px solid var(--slate-200);
+  border-radius: 8px;
+  transition: all 0.2s;
+  min-height: 64px;
+}
+.task-row:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--slate-300);
+}
+
+/* Expand/collapse control on the left */
+.expand-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.expand-button:hover:not(:disabled) { background: var(--slate-100); }
+.expand-button:disabled { cursor: default; }
+.expand-button-placeholder { width: 24px; height: 24px; flex-shrink: 0; }
+
+/* Ensure small icons inside buttons stay visible */
+.expand-button svg,
+.more-actions-button svg { width: 16px; height: 16px; display: block; color: var(--slate-500); stroke: currentColor; }
+
+/* === Task content (title + description) === */
+.task-content { flex: 1; min-width: 0; }
+.task-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+.task-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--slate-900);
+  margin: 0;
+  line-height: 1.4;
+}
+.task-description {
+  font-size: 14px;
+  color: var(--slate-500);
+  margin: 0;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+/* === Small badges shown next to tasks === */
+.status-badge,
+.priority-badge,
+.due-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--slate-200);
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+.status-badge { background: var(--slate-50); }
+.priority-badge { background: white; }
+.status-text, .priority-text, .due-date-text { font-size: 12px; white-space: nowrap; }
+
+/* === Actions dropdown/button area === */
+.task-actions-dropdown { flex-shrink: 0; }
+.more-actions-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+.more-actions-button:hover { background: var(--slate-100); }
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: white;
+  border: 1px solid var(--slate-200);
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+  min-width: 180px;
+  z-index: 50;
+  padding: 8px 4px;
+}
+.dropdown-item { display:flex; align-items:center; gap:10px; padding:8px 12px; font-size:14px; color:var(--slate-700); cursor:pointer; border-radius:6px; }
+.dropdown-item:hover { background: var(--slate-50); }
+.dropdown-item.delete { color: var(--red-500); }
+
+/* === Subtasks (nested list under a task) === */
+.subtasks-container {
+  position: relative;
+  margin-left: 0;
+  margin-top: 8px;
+  padding-left: 48px;
+  box-sizing: border-box;
+  width: 100%;
+}
+.connector-line { position: absolute; left: -24px; top: 0; bottom: 8px; width: 1px; background: var(--slate-200); }
+.horizontal-connector { position: absolute; left: -24px; top: 24px; width: 24px; height: 1px; background: var(--slate-200); }
+.subtask-row { position: relative; margin-bottom: 8px; }
+.subtask-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: white;
+  border: 1px solid var(--slate-200);
+  border-radius: 8px;
+  transition: all 0.2s;
+  margin-left: 0;
+}
+.subtask-card:hover { box-shadow: var(--shadow-sm); border-color: var(--slate-300); }
+
+/* === Small utility & color helpers used by the task list === */
+.text-slate-300 { color: var(--slate-300); }
+.text-slate-400 { color: var(--slate-400); }
+.text-slate-500 { color: var(--slate-500); }
+.text-blue-500 { color: var(--blue-500); }
+.text-orange-500 { color: var(--orange-500); }
+.text-red-500 { color: var(--red-500); }
+.text-emerald-500 { color: var(--emerald-500); }
+
+.w-4 { width: 16px; }
+.h-4 { height: 16px; }

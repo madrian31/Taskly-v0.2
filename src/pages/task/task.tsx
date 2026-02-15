@@ -462,9 +462,6 @@ function TaskComponent() {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <button className="filter-button">
-                            <Filter size={20} />
-                        </button>
                         <button className="new-task-button" onClick={() => openModal()}>
                             <Plus size={20} />
                             New Task

@@ -1,1 +1,0 @@
-import{j as t,O as s}from"./vendor_react-BPssBI41.js";import"./vendor-DhMbaX6P.js";function n(){return t.jsx("div",{className:"layout",children:t.jsx("main",{className:"content",children:t.jsx(s,{})})})}export{n as default};
