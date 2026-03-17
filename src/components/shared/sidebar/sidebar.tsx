@@ -103,15 +103,21 @@ export default function Sidebar({children}: SidebarProps) {
                 
                 <div className="sidebar-header">
 
-                 <h2>Tasky</h2>
+                 <h2>Taskly</h2>
 
                 <div className="user-profile">
                     <div className="user-avatar">
-                        <img
+                       <img
                             id="userPhoto"
                             src={getAvatarUrl({ photoURL: userPhoto, name: userName || 'User', size: 80, bgColor: '#3498db' })}
                             alt="Profile"
-                        />
+                            referrerPolicy="no-referrer"
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.onerror = null;
+                                target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName || 'User')}&background=3498db&color=fff&size=80`;
+                            }}
+                            />
                     </div>
                     <div className="user-info">
                         <h5 id="userName">{userName ?? 'Loading...'}</h5>
